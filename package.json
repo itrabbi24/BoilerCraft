@@ -1,0 +1,48 @@
+{
+  "name": "boilercraft",
+  "version": "1.0.0",
+  "description": "The Ultimate Open Source Multi-Stack Boilerplate Generator Studio",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server.js",
+    "desktop": "electron .",
+    "dev": "node server.js",
+    "build:exe": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.argrabbi.boilercraft",
+    "productName": "BoilerCraft Studio",
+    "win": {
+      "target": "portable",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "keywords": [
+    "boilerplate",
+    "scaffolding",
+    "nextjs",
+    "laravel",
+    "nodejs",
+    "dotnet",
+    "generator"
+  ],
+  "author": "ARG RABBI",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "axios": "^1.20.0",
+    "cors": "^2.8.6",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3",
+    "wait-on": "^9.1.0"
+  }
+}
