@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BoilerCraft — The Dynamic Multi-Stack Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --bg: #090d16;
+      --surface: #111827;
+      --surface-card: rgba(17, 24, 39, 0.7);
+      --surface-hover: #1f293d;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      --radius: 14px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-card: rgba(255, 255, 255, 0.85);
+      --surface-hover: #f1f5f9;
+      --border: rgba(0, 0, 0, 0.08);
+      --text: #0f172a;
+      --text-muted: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.12), transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(139, 92, 246, 0.12), transparent 45%);
+    }
+
+    header {
+      backdrop-filter: blur(16px);
+      background: rgba(9, 13, 22, 0.75);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 800; color: white;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .brand h1 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; }
+
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+    .theme-toggle-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+    }
+
+    .app-layout {
+      max-width: 1400px; margin: 0 auto; padding: 2.5rem;
+      display: grid; grid-template-columns: 1fr 430px; gap: 2.5rem;
+    }
+
+    .step-card {
+      background: var(--surface-card); backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2rem; margin-bottom: 2rem; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+    .step-num {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700;
+    }
+    .step-header h2 { font-size: 1.25rem; font-weight: 800; }
+
+    .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: span 2; }
+
+    label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    input[type="text"], input[type="number"] {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; outline: none;
+    }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+
+    .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+    .choice-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; cursor: pointer; transition: all 0.2s; position: relative;
+    }
+    .choice-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
+    .choice-card.selected {
+      border-color: var(--primary); background: rgba(59, 130, 246, 0.12);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .choice-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .choice-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+
+    .checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .checkbox-tile {
+      display: flex; align-items: center; gap: 12px; background: var(--surface);
+      border: 1px solid var(--border); padding: 12px 16px; border-radius: 10px; cursor: pointer;
+    }
+    .checkbox-tile input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
+
+    .preview-pane { position: sticky; top: 90px; height: fit-content; }
+    .preview-card {
+      background: var(--surface-card); backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .live-logo-preview {
+      display: flex; align-items: center; gap: 14px; padding: 14px;
+      background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1.5rem;
+    }
+    .live-logo-img {
+      width: 50px; height: 50px; border-radius: 12px; background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 800; color: white; overflow: hidden;
+    }
+    .live-logo-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    .summary-list { list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; margin-bottom: 2rem; }
+    .summary-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+    .summary-list span:first-child { color: var(--text-muted); }
+    .summary-list span:last-child { font-weight: 700; color: var(--text); }
+
+    .console-box {
+      background: #000; border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+      color: #34d399; height: 130px; overflow-y: auto; margin-bottom: 1.5rem;
+    }
+
+    .btn-generate {
+      width: 100%; background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: white; border: none; padding: 14px 20px; border-radius: 10px;
+      font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+    .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5); }
+    .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h1>BoilerCraft</h1>
+          <span style="font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 20px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">STUDIO</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle-btn" onclick="toggleThemeMode()">🌓 Toggle Theme</button>
+      <a href="https://github.com/itrabbi24/BoilerCraft" target="_blank" style="color: var(--text); text-decoration: none; font-size: 0.85rem; font-weight: 600;">⭐ Star on GitHub</a>
+      <a href="https://github.com/itrabbi24" target="_blank" style="color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 700;">ARG RABBI ↗</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    
+    <div class="config-flow">
+      
+      <!-- STEP 1: Project Info -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <h2>Project Identity & Setup</h2>
+        </div>
+        <div class="input-grid">
+          <div class="form-group">
+            <label for="projectName">Project Name (Directory & Slug)</label>
+            <input type="text" id="projectName" value="my-platform" oninput="updateSummary()">
+          </div>
+          <div class="form-group">
+            <label for="appTitle">Display App Title</label>
+            <input type="text" id="appTitle" value="Enterprise Platform" oninput="updateSummary()">
+          </div>
+          <div class="form-group full">
+            <label for="appDesc">Description</label>
+            <input type="text" id="appDesc" value="Full stack enterprise application powered by BoilerCraft" oninput="updateSummary()">
+          </div>
+          <div class="form-group">
+            <label for="author">Author Name</label>
+            <input type="text" id="author" value="ARG RABBI" oninput="updateSummary()">
+          </div>
+          <div class="form-group">
+            <label for="serverPort">Local Server Port</label>
+            <input type="number" id="serverPort" value="3000" oninput="updateSummary()">
+          </div>
+          <div class="form-group full">
+            <label for="logoUrl">Custom Logo (URL or SVG)</label>
+            <input type="text" id="logoUrl" placeholder="https://example.com/logo.png (or leave blank for letter avatar)" oninput="updateSummary()">
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 2: Backend Architecture -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <h2>Select Backend Framework</h2>
+        </div>
+        <div class="matrix-grid" id="backendOptions">
+          <div class="choice-card selected" onclick="selectBackend('dotnet-core', this)">
+            <div class="choice-title">🟣 .NET Core 8</div>
+            <div class="choice-desc">C# Web API, Entity Framework Core, Swagger OpenAPI.</div>
+          </div>
+          <div class="choice-card" onclick="selectBackend('nextjs', this)">
+            <div class="choice-title">🚀 Next.js</div>
+            <div class="choice-desc">App Router, React Server Components, Server Actions.</div>
+          </div>
+          <div class="choice-card" onclick="selectBackend('node-express', this)">
+            <div class="choice-title">⚡ Node.js + Express</div>
+            <div class="choice-desc">REST API, Controllers, Routes, Error Middleware.</div>
+          </div>
+          <div class="choice-card" onclick="selectBackend('laravel', this)">
+            <div class="choice-title">🐘 Laravel 11</div>
+            <div class="choice-desc">Artisan Engine, Vue/Blade, Eloquent ORM.</div>
+          </div>
+          <div class="choice-card" onclick="selectBackend('raw-php', this)">
+            <div class="choice-title">📦 Raw PHP (MVC)</div>
+            <div class="choice-desc">Modern MVC, PDO Singleton, jQuery AJAX Support.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 3: Database Engine (Independent) -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <h2>Select Database Engine</h2>
+        </div>
+        <div class="matrix-grid" id="dbOptions">
+          <div class="choice-card selected" onclick="selectDb('mssql', this)">
+            <div class="choice-title">🗄️ Microsoft SQL Server (MSSQL)</div>
+            <div class="choice-desc">Enterprise SQL Server with connection pool / EF Core.</div>
+          </div>
+          <div class="choice-card" onclick="selectDb('mysql', this)">
+            <div class="choice-title">🐬 MySQL / MariaDB</div>
+            <div class="choice-desc">Relational DB with pooling, PDO / Prisma / Eloquent.</div>
+          </div>
+          <div class="choice-card" onclick="selectDb('mongodb', this)">
+            <div class="choice-title">🍃 MongoDB</div>
+            <div class="choice-desc">NoSQL document store with Mongoose ODM integration.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 3: Styling Engine & UI Components -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <h2>Styling Engine & Dynamic UI Components</h2>
+        </div>
+
+        <label style="margin-bottom: 8px; display: block;">Design & CSS System:</label>
+        <div class="matrix-grid mb-4" id="styleOptions" style="margin-bottom: 1.5rem;">
+          <div class="choice-card selected" onclick="selectStyling('tailwind', this)">
+            <div class="choice-title">🎨 Tailwind CSS</div>
+            <div class="choice-desc">Utility-first modern styling with custom preconfigured classes.</div>
+          </div>
+          <div class="choice-card" onclick="selectStyling('bootstrap', this)">
+            <div class="choice-title">🅱️ Bootstrap 5</div>
+            <div class="choice-desc">Standard responsive grid, flexbox and battle-tested components.</div>
+          </div>
+          <div class="choice-card" onclick="selectStyling('vanilla', this)">
+            <div class="choice-title">✨ Vanilla CSS</div>
+            <div class="choice-desc">Pure CSS design tokens without external framework dependencies.</div>
+          </div>
+        </div>
+
+        <label style="margin-bottom: 8px; display: block;">Select Components to Auto-Inject:</label>
+        <div class="checkbox-group">
+          <label class="checkbox-tile">
+            <input type="checkbox" id="compSkeleton" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 600; font-size: 0.9rem;">Skeleton Loader</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Pulse placeholder cards & tables</div>
+            </div>
+          </label>
+          <label class="checkbox-tile">
+            <input type="checkbox" id="compSpinner" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 600; font-size: 0.9rem;">Loader Spinner</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Smooth rotating state indicator</div>
+            </div>
+          </label>
+          <label class="checkbox-tile">
+            <input type="checkbox" id="compModal" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 600; font-size: 0.9rem;">Action Modal</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Backdrop blur accessible dialog</div>
+            </div>
+          </label>
+          <label class="checkbox-tile">
+            <input type="checkbox" id="compOffcanvas" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 600; font-size: 0.9rem;">Offcanvas Drawer</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Sliding responsive navigation drawer</div>
+            </div>
+          </label>
+          <label class="checkbox-tile">
+            <input type="checkbox" id="compSwal" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 600; font-size: 0.9rem;">🔥 SweetAlert2 (Swal.fire)</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Animated confirmation & popup dialogs</div>
+            </div>
+          </label>
+          <label class="checkbox-tile">
+            <input type="checkbox" id="compToastr" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 600; font-size: 0.9rem;">🔔 Toastr / Sonner</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Corner toast alert notifications</div>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- STEP 4: Themes & Palettes -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-num">4</div>
+          <h2>Themes & Palette Customizer</h2>
+        </div>
+
+        <label style="margin-bottom: 8px; display: block;">Color Mode:</label>
+        <div class="matrix-grid mb-4" id="modeOptions" style="margin-bottom: 1.5rem;">
+          <div class="choice-card selected" onclick="selectMode('all', this)">
+            <div class="choice-title">🌓 All / Device Sync</div>
+            <div class="choice-desc">Auto syncs with user OS device dark/light preference.</div>
+          </div>
+          <div class="choice-card" onclick="selectMode('dark', this)">
+            <div class="choice-title">🌙 Dark Mode Only</div>
+            <div class="choice-desc">Deep modern dark theme with sleek surfaces.</div>
+          </div>
+          <div class="choice-card" onclick="selectMode('light', this)">
+            <div class="choice-title">☀️ Light Mode Only</div>
+            <div class="choice-desc">Clean, crisp high-readability daylight theme.</div>
+          </div>
+        </div>
+
+        <label style="margin-bottom: 8px; display: block;">Curated Color Palettes (Pick 1 of 4):</label>
+        <div class="matrix-grid" id="themePalettes">
+          <div class="choice-card selected" onclick="selectTheme('midnight', this)">
+            <div class="choice-title">🌌 Slate Midnight</div>
+            <div class="choice-desc">Deep cyber blues and cool slate gray hues.</div>
+          </div>
+          <div class="choice-card" onclick="selectTheme('emerald', this)">
+            <div class="choice-title">🌲 Cyber Emerald</div>
+            <div class="choice-desc">Vibrant emerald green highlights on charcoal.</div>
+          </div>
+          <div class="choice-card" onclick="selectTheme('royal', this)">
+            <div class="choice-title">👑 Royal Indigo</div>
+            <div class="choice-desc">Electric violet and indigo gradient tones.</div>
+          </div>
+          <div class="choice-card" onclick="selectTheme('crimson', this)">
+            <div class="choice-title">🔥 Crimson Amber</div>
+            <div class="choice-desc">Burgundy velvet surfaces with amber accents.</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Live Preview & Action Pane -->
+    <aside class="preview-pane">
+      <div class="preview-card">
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">Project Blueprint</h3>
+
+        <div class="live-logo-preview">
+          <div class="live-logo-img" id="previewLogoBox">P</div>
+          <div>
+            <div style="font-weight: 700; font-size: 1rem;" id="previewTitle">Enterprise Platform</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);" id="previewDesc">Full stack enterprise app...</div>
+          </div>
+        </div>
+
+        <ul class="summary-list">
+          <li>
+            <span>Target Folder</span>
+            <span id="sumSlug">my-platform</span>
+          </li>
+          <li>
+            <span>Architecture Stack</span>
+            <span id="sumStack">Raw PHP + MySQL</span>
+          </li>
+          <li>
+            <span>Database Engine</span>
+            <span id="sumDb">MYSQL</span>
+          </li>
+          <li>
+            <span>Styling Framework</span>
+            <span id="sumStyle">Tailwind CSS</span>
+          </li>
+          <li>
+            <span>Theme / Mode</span>
+            <span id="sumTheme">Slate Midnight (all)</span>
+          </li>
+          <li>
+            <span>UI Components</span>
+            <span id="sumComponents">Skeleton, Spinner, Modal, Offcanvas</span>
+          </li>
+          <li>
+            <span>Target Port</span>
+            <span id="sumPort">3000</span>
+          </li>
+          <li>
+            <span>Auto-Version Engine</span>
+            <span style="color: var(--accent-emerald);">⚡ Live Registry Resolving</span>
+          </li>
+        </ul>
+
+        <div class="console-box" id="consoleLogs">
+          [System Ready] BoilerCraft Studio initialized.<br>
+          Select options and click generate...
+        </div>
+
+        <button class="btn-generate" id="btnGen" onclick="generateProjectAction()">
+          <span>⚡ Generate Custom Boilerplate</span>
+        </button>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    const state = {
+      backend: 'dotnet-core',
+      database: 'mssql',
+      styling: 'tailwind',
+      colorMode: 'all',
+      theme: 'midnight'
+    };
+
+    function selectBackend(b, el) {
+      state.backend = b;
+      highlight(el, '#backendOptions');
+      updateSummary();
+    }
+
+    function selectDb(d, el) {
+      state.database = d;
+      highlight(el, '#dbOptions');
+      updateSummary();
+    }
+
+    function selectStyling(st, el) {
+      state.styling = st;
+      highlight(el, '#styleOptions');
+      updateSummary();
+    }
+
+    function selectMode(m, el) {
+      state.colorMode = m;
+      highlight(el, '#modeOptions');
+      updateSummary();
+    }
+
+    function selectTheme(th, el) {
+      state.theme = th;
+      highlight(el, '#themePalettes');
+      updateSummary();
+    }
+
+    function highlight(selectedEl, parentSelector) {
+      document.querySelectorAll(parentSelector + ' .choice-card').forEach(c => c.classList.remove('selected'));
+      selectedEl.classList.add('selected');
+    }
+
+    function updateSummary() {
+      const name = document.getElementById('projectName').value.trim() || 'my-project';
+      const title = document.getElementById('appTitle').value.trim() || 'My Platform';
+      const desc = document.getElementById('appDesc').value.trim() || 'Boilerplate Description';
+      const port = document.getElementById('serverPort').value || '3000';
+      const logo = document.getElementById('logoUrl').value.trim();
+
+      document.getElementById('sumSlug').innerText = name;
+      document.getElementById('previewTitle').innerText = title;
+      document.getElementById('previewDesc').innerText = desc.length > 32 ? desc.substring(0, 32) + '...' : desc;
+      document.getElementById('sumPort').innerText = port;
+      document.getElementById('sumStack').innerText = state.backend.toUpperCase();
+      document.getElementById('sumDb').innerText = state.database.toUpperCase();
+      document.getElementById('sumStyle').innerText = state.styling.toUpperCase();
+      document.getElementById('sumTheme').innerText = state.theme + ' (' + state.colorMode + ')';
+
+      const logoBox = document.getElementById('previewLogoBox');
+      if (logo) {
+        logoBox.innerHTML = `<img src="${logo}" alt="logo" onerror="this.parentElement.innerText='${title[0].toUpperCase()}'" />`;
+      } else {
+        logoBox.innerHTML = title[0].toUpperCase();
+      }
+
+      const comps = [];
+      if (document.getElementById('compSkeleton').checked) comps.push('Skeleton');
+      if (document.getElementById('compSpinner').checked) comps.push('Spinner');
+      if (document.getElementById('compModal').checked) comps.push('Modal');
+      if (document.getElementById('compOffcanvas').checked) comps.push('Offcanvas');
+      if (document.getElementById('compSwal').checked) comps.push('SweetAlert2');
+      if (document.getElementById('compToastr').checked) comps.push('Toastr/Sonner');
+      document.getElementById('sumComponents').innerText = comps.join(', ') || 'None';
+    }
+
+    function logToConsole(text) {
+      const b = document.getElementById('consoleLogs');
+      b.innerHTML += `<br>> ${text}`;
+      b.scrollTop = b.scrollHeight;
+    }
+
+    async function generateProjectAction() {
+      const btn = document.getElementById('btnGen');
+      btn.disabled = true;
+      btn.innerText = '⏳ Resolving & Generating...';
+      logToConsole(`Assembling custom combination: ${state.backend} + ${state.database} + ${state.styling}...`);
+
+      const payload = {
+        projectName: document.getElementById('projectName').value,
+        appTitle: document.getElementById('appTitle').value,
+        description: document.getElementById('appDesc').value,
+        author: document.getElementById('author').value,
+        port: parseInt(document.getElementById('serverPort').value),
+        logoUrl: document.getElementById('logoUrl').value,
+        backend: state.backend,
+        stack: state.backend,
+        database: state.database,
+        styling: state.styling,
+        colorMode: state.colorMode,
+        theme: state.theme,
+        components: {
+          skeleton: document.getElementById('compSkeleton').checked,
+          spinner: document.getElementById('compSpinner').checked,
+          modal: document.getElementById('compModal').checked,
+          offcanvas: document.getElementById('compOffcanvas').checked,
+          swalfire: document.getElementById('compSwal').checked,
+          toastr: document.getElementById('compToastr').checked
+        }
+      };
+
+      try {
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+          logToConsole(`SUCCESS! Created [${result.combination}] at: ${result.path}`);
+          alert(`🎉 Project '${result.projectName}' generated successfully!\n\nCombination: ${result.combination}\nFolder: ${result.path}`);
+        } else {
+          logToConsole(`ERROR: ${result.error}`);
+        }
+      } catch (err) {
+        logToConsole(`Error: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '⚡ Generate Custom Boilerplate';
+      }
+    }
+
+    function toggleThemeMode() {
+      const cur = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    }
+
+    updateSummary();
+  </script>
+</body>
+</html>
