@@ -17,10 +17,16 @@
       --border-focus: #0284c7;
       --text: #0f172a;
       --text-muted: #64748b;
-      --radius: 10px;
+      --radius: 8px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+    }
+
     body {
       background-color: var(--bg);
       color: var(--text);
@@ -28,68 +34,72 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Clean Clean Header */
+    /* Minimal Clean Header */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 50;
-      padding: 0.9rem 2.5rem;
+      padding: 0.85rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img { width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--border); }
-    .brand h1 { font-size: 1.15rem; font-weight: 800; color: var(--text); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 34px; height: 34px; border-radius: 6px; }
+    .brand h1 { font-size: 1.15rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
     .badge-clean {
-      font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+      font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;
       background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border);
     }
 
     .header-actions { display: flex; align-items: center; gap: 16px; }
     .header-actions a {
-      color: var(--text); text-decoration: none; font-size: 0.85rem; font-weight: 600;
+      color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600;
     }
     .header-actions a:hover { color: var(--primary); }
 
     /* Layout */
     .app-layout {
-      max-width: 1380px; margin: 0 auto; padding: 2rem;
-      display: grid; grid-template-columns: 1fr 420px; gap: 2rem;
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 1.75rem 2rem;
+      display: grid; 
+      grid-template-columns: 1fr 410px; 
+      gap: 1.75rem;
     }
 
     .step-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.75rem;
-      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
-    .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+    .step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem; }
     .step-num {
-      width: 26px; height: 26px; border-radius: 6px;
+      width: 24px; height: 24px; border-radius: 5px;
       background: var(--primary); color: white;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem; font-weight: 700;
+      font-size: 0.75rem; font-weight: 700;
     }
-    .step-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .step-header h2 { font-size: 1.05rem; font-weight: 700; color: var(--text); }
 
     .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-group.full { grid-column: span 2; }
 
     label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
     input[type="text"], input[type="number"] {
       background: #ffffff; border: 1px solid var(--border); color: var(--text);
-      padding: 9px 12px; border-radius: 7px; font-size: 0.9rem; outline: none;
+      padding: 9px 12px; border-radius: 6px; font-size: 0.9rem; outline: none;
     }
     input:focus { border-color: var(--border-focus); }
 
-    /* Folder Picker Input Group */
+    /* Destination Folder Picker Input */
     .folder-picker-group {
       display: flex; gap: 8px;
     }
@@ -98,54 +108,54 @@
     }
     .btn-browse {
       background: #f1f5f9; border: 1px solid var(--border); color: var(--text);
-      padding: 9px 16px; border-radius: 7px; font-size: 0.85rem; font-weight: 700;
-      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+      padding: 9px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: background 0.15s; white-space: nowrap;
     }
     .btn-browse:hover { background: #e2e8f0; }
 
-    /* Choice Grid */
+    /* Clean Solid Choice Cards */
     .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
     .choice-card {
-      background: #ffffff; border: 1px solid var(--border); border-radius: 8px;
-      padding: 14px; cursor: pointer; transition: all 0.15s;
+      background: #ffffff; border: 1px solid var(--border); border-radius: 7px;
+      padding: 12px 14px; cursor: pointer; transition: all 0.15s;
     }
     .choice-card:hover { border-color: #cbd5e1; background: #f8fafc; }
     .choice-card.selected {
       border-color: var(--primary); background: #f0f9ff;
     }
-    .choice-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+    .choice-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; color: var(--text); }
     .choice-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
 
-    /* Checkboxes */
+    /* Clean Solid Checkboxes */
     .checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .checkbox-tile {
       display: flex; align-items: center; gap: 10px; background: #ffffff;
-      border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--border); padding: 10px 14px; border-radius: 6px; cursor: pointer;
     }
     .checkbox-tile:hover { background: #f8fafc; }
     .checkbox-tile input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--primary); }
 
-    /* Right Preview Pane */
-    .preview-pane { position: sticky; top: 80px; height: fit-content; }
+    /* Right Preview Sidebar */
+    .preview-pane { position: sticky; top: 75px; height: fit-content; }
     .preview-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1.75rem;
+      border-radius: var(--radius); padding: 1.5rem;
     }
 
     .summary-list { list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; margin-bottom: 1.5rem; }
-    .summary-list li { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 7px; }
+    .summary-list li { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
     .summary-list span:first-child { color: var(--text-muted); }
     .summary-list span:last-child { font-weight: 700; color: var(--text); }
 
     .console-box {
-      background: #0f172a; border-radius: 8px; padding: 12px;
+      background: #0f172a; border-radius: 6px; padding: 12px;
       font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #38bdf8;
       height: 120px; overflow-y: auto; margin-bottom: 1.25rem;
     }
 
     .btn-generate {
       width: 100%; background: var(--primary); color: white;
-      border: none; padding: 13px 20px; border-radius: 8px; font-size: 0.95rem;
+      border: none; padding: 13px 20px; border-radius: 6px; font-size: 0.95rem;
       font-weight: 700; cursor: pointer; transition: background 0.15s;
     }
     .btn-generate:hover { background: var(--primary-hover); }
@@ -154,9 +164,10 @@
 </head>
 <body>
 
+  <!-- Minimal Header -->
   <header>
     <div class="brand">
-      <img src="/logo.png" alt="BoilerCraft Logo">
+      <img src="/logo.svg" alt="BoilerCraft Logo">
       <div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <h1>BoilerCraft Studio</h1>
@@ -166,7 +177,7 @@
     </div>
     <div class="header-actions">
       <a href="https://github.com/itrabbi24/BoilerCraft" target="_blank">GitHub Repository ↗</a>
-      <a href="https://github.com/itrabbi24" target="_blank" style="color: var(--primary);">ARG RABBI</a>
+      <a href="https://github.com/itrabbi24" target="_blank" style="color: var(--primary); font-weight: 700;">ARG RABBI</a>
     </div>
   </header>
 
@@ -174,29 +185,28 @@
     
     <div class="config-flow">
       
-      <!-- STEP 1: Location & Identity -->
+      <!-- STEP 1: Location & Information -->
       <section class="step-card">
         <div class="step-header">
           <div class="step-num">1</div>
-          <h2>Output Folder & Project Information</h2>
+          <h2>Output Location & Project Details</h2>
         </div>
         <div class="input-grid">
           
           <div class="form-group full">
-            <label for="outputFolder">Destination Folder (Where to create project)</label>
+            <label for="outputFolder">Output Directory (Where to create project)</label>
             <div class="folder-picker-group">
-              <input type="text" id="outputFolder" placeholder="D:\Projects or leave empty for default generated/ folder" oninput="updateSummary()">
+              <input type="text" id="outputFolder" placeholder="C:\Projects or leave empty for default generated/ folder" oninput="updateSummary()">
               <button type="button" class="btn-browse" onclick="browseFolder()">📁 Choose Folder</button>
             </div>
-            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px;">Select any folder on your computer (e.g. Desktop, D:\Projects).</span>
           </div>
 
           <div class="form-group">
-            <label for="projectName">Project Directory Name (Slug)</label>
+            <label for="projectName">Project Name (Directory & Slug)</label>
             <input type="text" id="projectName" value="my-platform" oninput="updateSummary()">
           </div>
           <div class="form-group">
-            <label for="appTitle">Display Application Title</label>
+            <label for="appTitle">Application Title</label>
             <input type="text" id="appTitle" value="Enterprise Platform" oninput="updateSummary()">
           </div>
           <div class="form-group full">
@@ -270,22 +280,22 @@
       <section class="step-card">
         <div class="step-header">
           <div class="step-num">4</div>
-          <h2>Styling Engine & Essential Components</h2>
+          <h2>Styling & Essential UI Components</h2>
         </div>
 
         <label style="margin-bottom: 8px; display: block;">Styling Framework:</label>
         <div class="matrix-grid mb-4" id="styleOptions" style="margin-bottom: 1.25rem;">
           <div class="choice-card selected" onclick="selectStyling('tailwind', this)">
             <div class="choice-title">Tailwind CSS</div>
-            <div class="choice-desc">Modern utility-first CSS framework.</div>
+            <div class="choice-desc">Utility-first modern CSS framework.</div>
           </div>
           <div class="choice-card" onclick="selectStyling('bootstrap', this)">
             <div class="choice-title">Bootstrap 5</div>
-            <div class="choice-desc">Industry-standard responsive components and grid.</div>
+            <div class="choice-desc">Responsive components and grid.</div>
           </div>
           <div class="choice-card" onclick="selectStyling('vanilla', this)">
             <div class="choice-title">Vanilla CSS</div>
-            <div class="choice-desc">Lightweight pure design tokens without dependencies.</div>
+            <div class="choice-desc">Zero-dependency pure CSS design tokens.</div>
           </div>
         </div>
 
@@ -338,7 +348,7 @@
 
     </div>
 
-    <!-- Right Live Preview & Action Pane -->
+    <!-- Right Summary Sidebar -->
     <aside class="preview-pane">
       <div class="preview-card">
         <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem;">Project Configuration</h3>
@@ -346,7 +356,7 @@
         <ul class="summary-list">
           <li>
             <span>Destination Path</span>
-            <span id="sumPath" style="word-break: break-all; text-align: right; max-width: 220px;">[Default: generated/]</span>
+            <span id="sumPath" style="word-break: break-all; text-align: right; max-width: 210px; color: var(--primary);">[Default: generated/]</span>
           </li>
           <li>
             <span>Target Folder</span>
@@ -376,7 +386,7 @@
 
         <div class="console-box" id="consoleLogs">
           [Ready] BoilerCraft Studio initialized.<br>
-          Select destination and click Generate...
+          Select destination and click Generate Project...
         </div>
 
         <button class="btn-generate" id="btnGen" onclick="generateProjectAction()">
@@ -399,9 +409,7 @@
     const state = {
       backend: 'dotnet-core',
       database: 'mssql',
-      styling: 'tailwind',
-      colorMode: 'all',
-      theme: 'midnight'
+      styling: 'tailwind'
     };
 
     async function browseFolder() {
@@ -412,7 +420,7 @@
           updateSummary();
         }
       } else {
-        const manual = prompt('Enter absolute destination folder path (e.g. D:\\MyProjects):');
+        const manual = prompt('Enter destination folder path (e.g. D:\\MyProjects):');
         if (manual) {
           document.getElementById('outputFolder').value = manual;
           updateSummary();
@@ -488,8 +496,6 @@
         stack: state.backend,
         database: state.database,
         styling: state.styling,
-        colorMode: state.colorMode,
-        theme: state.theme,
         components: {
           skeleton: document.getElementById('compSkeleton').checked,
           spinner: document.getElementById('compSpinner').checked,
