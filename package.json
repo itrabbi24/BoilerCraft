@@ -18,6 +18,7 @@
       "repo": "BoilerCraft"
     },
     "win": {
+      "icon": "assets/icon.png",
       "target": [
         "nsis",
         "portable"

@@ -43,12 +43,15 @@ function setupAutoUpdater() {
 
 function createWindow(port) {
   mainWindow = new BrowserWindow({
-    width: 1360,
-    height: 900,
-    minWidth: 1024,
-    minHeight: 700,
-    title: 'BoilerCraft — The Ultimate Multi-Stack Project Studio',
+    width: 1380,
+    height: 920,
+    minWidth: 1080,
+    minHeight: 720,
+    title: 'BoilerCraft Studio',
+    icon: path.join(__dirname, 'assets', 'icon.png'),
     backgroundColor: '#090d16',
+    autoHideMenuBar: true,
+    show: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true
@@ -56,6 +59,10 @@ function createWindow(port) {
   });
 
   mainWindow.loadURL(`http://localhost:${port}`);
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
 
   mainWindow.on('closed', function () {
     mainWindow = null;
