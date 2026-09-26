@@ -12,8 +12,16 @@
   "build": {
     "appId": "com.argrabbi.boilercraft",
     "productName": "BoilerCraft Studio",
+    "publish": {
+      "provider": "github",
+      "owner": "itrabbi24",
+      "repo": "BoilerCraft"
+    },
     "win": {
-      "target": "portable",
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "requestedExecutionLevel": "asInvoker"
     },
     "directories": {
@@ -37,6 +45,7 @@
     "axios": "^1.20.0",
     "cors": "^2.8.6",
     "ejs": "^6.0.1",
+    "electron-updater": "^6.8.9",
     "express": "^5.2.1"
   },
   "devDependencies": {
