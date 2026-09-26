@@ -15,8 +15,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/api/generate', async (req, res) => {
   try {
     const config = req.body;
-    console.log(`[BoilerCraft] Generating project: ${config.projectName} (${config.stack})`);
-    const result = await generateProject(config);
+    console.log(`[BoilerCraft] Generating project: ${config.projectName} at: ${config.outputDir || 'default'}`);
+    const result = await generateProject(config, config.outputDir || null);
     res.json(result);
   } catch (err) {
     console.error('[BoilerCraft] Generation Error:', err);

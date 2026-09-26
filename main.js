@@ -1,33 +1,15 @@
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const { startServer } = require('./server');
 
 let mainWindow;
 
-// Configure autoUpdater logging and GitHub Release feed
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
 
 function setupAutoUpdater() {
-  autoUpdater.on('checking-for-update', () => {
-    console.log('[AutoUpdater] Checking for updates on GitHub Releases...');
-  });
-
-  autoUpdater.on('update-available', (info) => {
-    console.log(`[AutoUpdater] New version ${info.version} available! Downloading...`);
-  });
-
-  autoUpdater.on('update-not-available', (info) => {
-    console.log('[AutoUpdater] App is up to date.');
-  });
-
-  autoUpdater.on('error', (err) => {
-    console.warn('[AutoUpdater] Error checking update:', err.message);
-  });
-
   autoUpdater.on('update-downloaded', (info) => {
-    console.log(`[AutoUpdater] Version ${info.version} downloaded.`);
     dialog.showMessageBox({
       type: 'info',
       title: 'Update Ready — BoilerCraft Studio',
@@ -49,12 +31,12 @@ function createWindow(port) {
     minHeight: 720,
     title: 'BoilerCraft Studio',
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    backgroundColor: '#090d16',
+    backgroundColor: '#ffffff',
     autoHideMenuBar: true,
     show: false,
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true
+      nodeIntegration: true,
+      contextIsolation: false
     }
   });
 
@@ -69,11 +51,21 @@ function createWindow(port) {
   });
 }
 
+// IPC handler to open native Windows Folder Picker dialog
+ipcMain.handle('select-directory', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory', 'createDirectory'],
+    title: 'Select Destination Folder for Your Project'
+  });
+  if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+    return null;
+  }
+  return result.filePaths[0];
+});
+
 app.whenReady().then(() => {
   startServer((port) => {
     createWindow(port);
-    
-    // Check for updates automatically in production packaged app
     if (app.isPackaged) {
       setupAutoUpdater();
       autoUpdater.checkForUpdatesAndNotify();
