@@ -418,6 +418,11 @@ app.Run();
     ensureDir(path.join(targetDir, 'src', 'styles'));
     ensureDir(path.join(targetDir, 'src', 'lib'));
 
+    const nextTplDir = path.join(__dirname, '..', 'templates', 'nextjs', 'src');
+    if (fs.existsSync(nextTplDir)) {
+      copyFolderRecursive(nextTplDir, path.join(targetDir, 'src'), replaceMap);
+    }
+
     fs.writeFileSync(path.join(targetDir, 'src', 'styles', 'theme.css'), themeCSS);
     fs.writeFileSync(path.join(targetDir, 'src', 'lib', 'db.js'), getUniversalDbHelper('nextjs', database, projectName));
 
@@ -523,12 +528,18 @@ export default function Home() {
     fs.writeFileSync(path.join(targetDir, 'public', 'theme.js'), themeJS);
     fs.writeFileSync(path.join(targetDir, 'src', 'db.js'), getUniversalDbHelper('node', database, projectName));
 
+    const nodeTplDir = path.join(__dirname, '..', 'templates', 'node-express', 'src');
+    if (fs.existsSync(nodeTplDir)) {
+      copyFolderRecursive(nodeTplDir, path.join(targetDir, 'src'), replaceMap);
+    }
+
     const srv = `
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const { connectDB } = require('./db');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || ${config.port || 5000};
@@ -539,12 +550,16 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 connectDB();
 
+// API Endpoints
+app.use('/api/auth', authRoutes);
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     app: '${config.appTitle || projectName}',
     database: '${database}',
     styling: '${styling}',
+    auth: ${isAuth ? 'true' : 'false'},
     author: '${config.author || 'ARG RABBI'}'
   });
 });
