@@ -296,32 +296,73 @@ app.Run();
   }
 
   // ==========================================
-  // 3. LARAVEL (Vue or Blade + ANY DB + ANY STYLING)
+  // 3. LARAVEL (Genuine Full Laravel 11 Structure + Vue 3 / Blade + Artisan + Migrations)
   // ==========================================
   else if (backend === 'laravel' || backend === 'laravel-vue-mysql') {
-    const srcDir = path.join(__dirname, '..', 'templates', 'laravel-vue-mysql');
+    const srcDir = path.join(__dirname, '..', 'templates', 'laravel-full');
     copyFolderRecursive(srcDir, targetDir, replaceMap);
+
+    const laravelDeps = {
+      "php": "^8.2",
+      "laravel/framework": "^11.0",
+      "laravel/tinker": "^2.9",
+      "inertiajs/inertia-laravel": "^1.0"
+    };
 
     const composerJson = {
       name: `developer/${projectName}`,
       type: "project",
-      description: config.description || "Laravel 11 Multi-Stack Project",
-      require: {
-        "php": "^8.2",
-        "laravel/framework": "^11.0",
-        "inertiajs/inertia-laravel": "^1.0"
+      description: config.description || "Laravel 11 Full Stack Project",
+      keywords: ["framework", "laravel"],
+      license: "MIT",
+      require: laravelDeps,
+      "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.0",
+        "phpunit/phpunit": "^11.0"
+      },
+      "autoload": {
+        "psr-4": {
+          "App\\\\": "app/",
+          "Database\\\\Factories\\\\": "database/factories/",
+          "Database\\\\Seeders\\\\": "database/seeders/"
+        }
+      },
+      "scripts": {
+        "post-autoload-dump": [
+          "Illuminate\\\\Foundation\\\\ComposerScripts::postAutoloadDump",
+          "@php artisan package:discover --ansi"
+        ]
+      },
+      "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
       }
     };
     fs.writeFileSync(path.join(targetDir, 'composer.json'), JSON.stringify(composerJson, null, 2));
 
-    const vueDeps = await resolveDependencies(['vue', '@vitejs/plugin-vue', '@inertiajs/vue3'], 'npm');
-    if (styling === 'tailwind') Object.assign(vueDeps, await resolveDependencies(['tailwindcss', 'postcss', 'autoprefixer'], 'npm'));
-    if (styling === 'bootstrap') Object.assign(vueDeps, await resolveDependencies(['bootstrap'], 'npm'));
+    const vueDeps = await resolveDependencies([
+      'vue', 
+      '@vitejs/plugin-vue', 
+      '@inertiajs/vue3', 
+      'laravel-vite-plugin', 
+      'vite', 
+      'axios'
+    ], 'npm');
+
+    if (styling === 'tailwind') {
+      Object.assign(vueDeps, await resolveDependencies(['tailwindcss', 'postcss', 'autoprefixer'], 'npm'));
+    }
 
     const pkgJson = {
       private: true,
       type: "module",
-      scripts: { dev: "vite", build: "vite build" },
+      scripts: {
+        "dev": "vite",
+        "build": "vite build"
+      },
       devDependencies: vueDeps
     };
     fs.writeFileSync(path.join(targetDir, 'package.json'), JSON.stringify(pkgJson, null, 2));
