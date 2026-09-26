@@ -20,71 +20,41 @@
       --radius: 8px;
     }
 
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Minimal Clean Header */
     header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      padding: 0.85rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 50; padding: 0.85rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
     }
 
     .brand { display: flex; align-items: center; gap: 10px; }
     .brand img { width: 34px; height: 34px; border-radius: 6px; }
-    .brand h1 { font-size: 1.15rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+    .brand h1 { font-size: 1.15rem; font-weight: 800; color: var(--text); }
     .badge-clean {
       font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;
       background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border);
     }
 
     .header-actions { display: flex; align-items: center; gap: 16px; }
-    .header-actions a {
-      color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600;
-    }
+    .header-actions a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
     .header-actions a:hover { color: var(--primary); }
 
-    /* Layout */
     .app-layout {
-      max-width: 1400px; 
-      margin: 0 auto; 
-      padding: 1.75rem 2rem;
-      display: grid; 
-      grid-template-columns: 1fr 410px; 
-      gap: 1.75rem;
+      max-width: 1400px; margin: 0 auto; padding: 1.75rem 2rem;
+      display: grid; grid-template-columns: 1fr 410px; gap: 1.75rem;
     }
 
     .step-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1.25rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem;
     }
 
     .step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem; }
     .step-num {
-      width: 24px; height: 24px; border-radius: 5px;
-      background: var(--primary); color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 700;
+      width: 24px; height: 24px; border-radius: 5px; background: var(--primary); color: white;
+      display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;
     }
     .step-header h2 { font-size: 1.05rem; font-weight: 700; color: var(--text); }
 
@@ -93,19 +63,14 @@
     .form-group.full { grid-column: span 2; }
 
     label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
-    input[type="text"], input[type="number"] {
+    input[type="text"], input[type="number"], select {
       background: #ffffff; border: 1px solid var(--border); color: var(--text);
       padding: 9px 12px; border-radius: 6px; font-size: 0.9rem; outline: none;
     }
-    input:focus { border-color: var(--border-focus); }
+    input:focus, select:focus { border-color: var(--border-focus); }
 
-    /* Destination Folder Picker Input */
-    .folder-picker-group {
-      display: flex; gap: 8px;
-    }
-    .folder-picker-group input {
-      flex: 1;
-    }
+    .folder-picker-group { display: flex; gap: 8px; }
+    .folder-picker-group input { flex: 1; }
     .btn-browse {
       background: #f1f5f9; border: 1px solid var(--border); color: var(--text);
       padding: 9px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 700;
@@ -113,20 +78,22 @@
     }
     .btn-browse:hover { background: #e2e8f0; }
 
-    /* Clean Solid Choice Cards */
     .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
     .choice-card {
       background: #ffffff; border: 1px solid var(--border); border-radius: 7px;
       padding: 12px 14px; cursor: pointer; transition: all 0.15s;
     }
     .choice-card:hover { border-color: #cbd5e1; background: #f8fafc; }
-    .choice-card.selected {
-      border-color: var(--primary); background: #f0f9ff;
-    }
+    .choice-card.selected { border-color: var(--primary); background: #f0f9ff; }
     .choice-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; color: var(--text); }
     .choice-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
 
-    /* Clean Solid Checkboxes */
+    /* Version / Framework Dropdowns Bar */
+    .framework-controls {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 14px;
+    }
+
     .checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .checkbox-tile {
       display: flex; align-items: center; gap: 10px; background: #ffffff;
@@ -135,12 +102,8 @@
     .checkbox-tile:hover { background: #f8fafc; }
     .checkbox-tile input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--primary); }
 
-    /* Right Preview Sidebar */
     .preview-pane { position: sticky; top: 75px; height: fit-content; }
-    .preview-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1.5rem;
-    }
+    .preview-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
 
     .summary-list { list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; margin-bottom: 1.5rem; }
     .summary-list li { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
@@ -150,7 +113,7 @@
     .console-box {
       background: #0f172a; border-radius: 6px; padding: 12px;
       font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #38bdf8;
-      height: 120px; overflow-y: auto; margin-bottom: 1.25rem;
+      height: 130px; overflow-y: auto; margin-bottom: 1.25rem;
     }
 
     .btn-generate {
@@ -164,7 +127,6 @@
 </head>
 <body>
 
-  <!-- Minimal Header -->
   <header>
     <div class="brand">
       <img src="/logo.svg" alt="BoilerCraft Logo">
@@ -185,28 +147,27 @@
     
     <div class="config-flow">
       
-      <!-- STEP 1: Location & Information -->
+      <!-- STEP 1: Output Location & Information -->
       <section class="step-card">
         <div class="step-header">
           <div class="step-num">1</div>
           <h2>Output Location & Project Details</h2>
         </div>
         <div class="input-grid">
-          
           <div class="form-group full">
             <label for="outputFolder">Output Directory (Where to create project)</label>
             <div class="folder-picker-group">
-              <input type="text" id="outputFolder" placeholder="C:\Projects or leave empty for default generated/ folder" oninput="updateSummary()">
+              <input type="text" id="outputFolder" placeholder="C:\Users\Desktop\test or leave empty for default generated/ folder" oninput="updateSummary()">
               <button type="button" class="btn-browse" onclick="browseFolder()">📁 Choose Folder</button>
             </div>
           </div>
 
           <div class="form-group">
-            <label for="projectName">Project Name (Directory & Slug)</label>
+            <label for="projectName">Project Name (Folder Slug)</label>
             <input type="text" id="projectName" value="my-platform" oninput="updateSummary()">
           </div>
           <div class="form-group">
-            <label for="appTitle">Application Title</label>
+            <label for="appTitle">Display App Title</label>
             <input type="text" id="appTitle" value="Enterprise Platform" oninput="updateSummary()">
           </div>
           <div class="form-group full">
@@ -224,50 +185,109 @@
         </div>
       </section>
 
-      <!-- STEP 2: Backend Architecture -->
+      <!-- STEP 2: Backend Architecture & Specific Versions -->
       <section class="step-card">
         <div class="step-header">
           <div class="step-num">2</div>
-          <h2>Backend Architecture</h2>
+          <h2>Backend Architecture & Versioning</h2>
         </div>
         <div class="matrix-grid" id="backendOptions">
-          <div class="choice-card selected" onclick="selectBackend('dotnet-core', this)">
-            <div class="choice-title">.NET Core 8</div>
-            <div class="choice-desc">C# Web API, Entity Framework Core, Swagger OpenAPI.</div>
+          <div class="choice-card selected" onclick="selectBackend('laravel', this)">
+            <div class="choice-title">🔴 Laravel</div>
+            <div class="choice-desc">Artisan Engine, Vue/Blade, Eloquent ORM, Full Scaffolding.</div>
           </div>
           <div class="choice-card" onclick="selectBackend('nextjs', this)">
-            <div class="choice-title">Next.js</div>
+            <div class="choice-title">🚀 Next.js</div>
             <div class="choice-desc">App Router, React Server Components, Server Actions.</div>
           </div>
           <div class="choice-card" onclick="selectBackend('node-express', this)">
-            <div class="choice-title">Node.js + Express</div>
+            <div class="choice-title">⚡ Node.js + Express</div>
             <div class="choice-desc">Clean Architecture, JWT Middleware, Error Handlers.</div>
           </div>
-          <div class="choice-card" onclick="selectBackend('laravel', this)">
-            <div class="choice-title">Laravel 11</div>
-            <div class="choice-desc">Artisan Engine, Vue/Blade, Eloquent ORM.</div>
+          <div class="choice-card" onclick="selectBackend('dotnet-core', this)">
+            <div class="choice-title">🟣 .NET Core</div>
+            <div class="choice-desc">C# Web API, Entity Framework Core, Swagger OpenAPI.</div>
           </div>
           <div class="choice-card" onclick="selectBackend('raw-php', this)">
-            <div class="choice-title">Raw PHP (MVC)</div>
+            <div class="choice-title">📦 Raw PHP (MVC)</div>
             <div class="choice-desc">Modern MVC, PDO Multi-Driver, QueryBuilder, AJAX.</div>
+          </div>
+        </div>
+
+        <!-- Dynamic Version Controls (Shown dynamically for active backend) -->
+        <div class="framework-controls" id="versionControlBox">
+          <div class="form-group" id="laravelVersionGroup">
+            <label for="laravelVersion">Laravel Framework Release</label>
+            <select id="laravelVersion" onchange="updateSummary()">
+              <option value="^11.0" selected>Laravel 11.x (Latest Modern LTS)</option>
+              <option value="^10.0">Laravel 10.x (Classic LTS)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="nodeVersionGroup">
+            <label for="nodeVersion">Node.js Express Release</label>
+            <select id="nodeVersion" onchange="updateSummary()">
+              <option value="^5.0.0" selected>Express 5.x (Modern Next-Gen)</option>
+              <option value="^4.21.0">Express 4.x (Classic Stable)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="nextVersionGroup">
+            <label for="nextVersion">Next.js Engine Version</label>
+            <select id="nextVersion" onchange="updateSummary()">
+              <option value="^15.0.0">Next.js 15.x (Turbopack + React 19)</option>
+              <option value="^14.2.0" selected>Next.js 14.x (Stable App Router)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="dotnetVersionGroup">
+            <label for="dotnetVersion">.NET Target Framework</label>
+            <select id="dotnetVersion" onchange="updateSummary()">
+              <option value="net8.0" selected>.NET 8.0 (Long Term Support)</option>
+              <option value="net9.0">.NET 9.0 (Standard Term Support)</option>
+            </select>
           </div>
         </div>
       </section>
 
-      <!-- STEP 3: Database Engine -->
+      <!-- STEP 3: Authentication & Security -->
       <section class="step-card">
         <div class="step-header">
           <div class="step-num">3</div>
+          <h2>Authentication & Security Modules</h2>
+        </div>
+        <div class="checkbox-group">
+          <label class="checkbox-tile">
+            <input type="checkbox" id="authEnabled" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 700; font-size: 0.9rem;">🔐 Enable Authentication (Login & Register)</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Include password hashing, sessions/JWT, & controllers</div>
+            </div>
+          </label>
+          <label class="checkbox-tile">
+            <input type="checkbox" id="roleAuthEnabled" checked onchange="updateSummary()">
+            <div>
+              <div style="font-weight: 700; font-size: 0.9rem;">🛡️ Role-Based Authorization Guard</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Admin/User permissions & route guard middlewares</div>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- STEP 4: Database Engine -->
+      <section class="step-card">
+        <div class="step-header">
+          <div class="step-num">4</div>
           <h2>Database Engine</h2>
         </div>
         <div class="matrix-grid" id="dbOptions">
-          <div class="choice-card selected" onclick="selectDb('mssql', this)">
+          <div class="choice-card selected" onclick="selectDb('mysql', this)">
+            <div class="choice-title">MySQL / MariaDB</div>
+            <div class="choice-desc">Relational DB with connection pooling & migrations.</div>
+          </div>
+          <div class="choice-card" onclick="selectDb('mssql', this)">
             <div class="choice-title">Microsoft SQL Server</div>
             <div class="choice-desc">Enterprise SQL Server pool / EF Core connector.</div>
-          </div>
-          <div class="choice-card" onclick="selectDb('mysql', this)">
-            <div class="choice-title">MySQL / MariaDB</div>
-            <div class="choice-desc">Relational DB with connection pooling.</div>
           </div>
           <div class="choice-card" onclick="selectDb('mongodb', this)">
             <div class="choice-title">MongoDB</div>
@@ -276,11 +296,11 @@
         </div>
       </section>
 
-      <!-- STEP 4: Styling & UI Components -->
+      <!-- STEP 5: Styling & UI Components -->
       <section class="step-card">
         <div class="step-header">
-          <div class="step-num">4</div>
-          <h2>Styling & Essential UI Components</h2>
+          <div class="step-num">5</div>
+          <h2>Styling Engine & Essential UI Components</h2>
         </div>
 
         <label style="margin-bottom: 8px; display: block;">Styling Framework:</label>
@@ -295,7 +315,7 @@
           </div>
           <div class="choice-card" onclick="selectStyling('vanilla', this)">
             <div class="choice-title">Vanilla CSS</div>
-            <div class="choice-desc">Zero-dependency pure CSS design tokens.</div>
+            <div class="choice-desc">Zero-dependency pure design tokens.</div>
           </div>
         </div>
 
@@ -363,12 +383,16 @@
             <span id="sumSlug">my-platform</span>
           </li>
           <li>
-            <span>Backend</span>
-            <span id="sumStack">DOTNET-CORE</span>
+            <span>Backend & Version</span>
+            <span id="sumStack">LARAVEL (^11.0)</span>
+          </li>
+          <li>
+            <span>Authentication</span>
+            <span id="sumAuth" style="color: #10b981;">Active (Auth + Roles)</span>
           </li>
           <li>
             <span>Database</span>
-            <span id="sumDb">MSSQL</span>
+            <span id="sumDb">MYSQL</span>
           </li>
           <li>
             <span>Styling</span>
@@ -378,15 +402,11 @@
             <span>Port</span>
             <span id="sumPort">3000</span>
           </li>
-          <li>
-            <span>Active Components</span>
-            <span id="sumComponents">Skeleton, Spinner, Modal...</span>
-          </li>
         </ul>
 
         <div class="console-box" id="consoleLogs">
           [Ready] BoilerCraft Studio initialized.<br>
-          Select destination and click Generate Project...
+          Select options and click Generate Project...
         </div>
 
         <button class="btn-generate" id="btnGen" onclick="generateProjectAction()">
@@ -407,8 +427,8 @@
     } catch (e) {}
 
     const state = {
-      backend: 'dotnet-core',
-      database: 'mssql',
+      backend: 'laravel',
+      database: 'mysql',
       styling: 'tailwind'
     };
 
@@ -420,7 +440,7 @@
           updateSummary();
         }
       } else {
-        const manual = prompt('Enter destination folder path (e.g. D:\\MyProjects):');
+        const manual = prompt('Enter destination folder path (e.g. C:\\Users\\Desktop\\test):');
         if (manual) {
           document.getElementById('outputFolder').value = manual;
           updateSummary();
@@ -431,7 +451,20 @@
     function selectBackend(b, el) {
       state.backend = b;
       highlight(el, '#backendOptions');
+      syncVersionDropdownVisibility();
       updateSummary();
+    }
+
+    function syncVersionDropdownVisibility() {
+      const laravelGroup = document.getElementById('laravelVersionGroup');
+      const nodeGroup = document.getElementById('nodeVersionGroup');
+      const nextGroup = document.getElementById('nextVersionGroup');
+      const dotnetGroup = document.getElementById('dotnetVersionGroup');
+
+      laravelGroup.style.display = (state.backend === 'laravel') ? 'flex' : 'none';
+      nextGroup.style.display = (state.backend === 'nextjs') ? 'flex' : 'none';
+      nodeGroup.style.display = (state.backend === 'node-express') ? 'flex' : 'none';
+      dotnetGroup.style.display = (state.backend === 'dotnet-core') ? 'flex' : 'none';
     }
 
     function selectDb(d, el) {
@@ -458,19 +491,24 @@
 
       document.getElementById('sumSlug').innerText = name;
       document.getElementById('sumPort').innerText = port;
-      document.getElementById('sumStack').innerText = state.backend.toUpperCase();
       document.getElementById('sumDb').innerText = state.database.toUpperCase();
       document.getElementById('sumStyle').innerText = state.styling.toUpperCase();
       document.getElementById('sumPath').innerText = outDir || '[Default: generated/]';
 
-      const comps = [];
-      if (document.getElementById('compSkeleton').checked) comps.push('Skeleton');
-      if (document.getElementById('compSpinner').checked) comps.push('Spinner');
-      if (document.getElementById('compModal').checked) comps.push('Modal');
-      if (document.getElementById('compOffcanvas').checked) comps.push('Offcanvas');
-      if (document.getElementById('compSwal').checked) comps.push('Swal2');
-      if (document.getElementById('compToastr').checked) comps.push('Toastr');
-      document.getElementById('sumComponents').innerText = comps.join(', ') || 'None';
+      // Version display
+      let verText = '';
+      if (state.backend === 'laravel') verText = document.getElementById('laravelVersion').value;
+      else if (state.backend === 'nextjs') verText = document.getElementById('nextVersion').value;
+      else if (state.backend === 'node-express') verText = document.getElementById('nodeVersion').value;
+      else if (state.backend === 'dotnet-core') verText = document.getElementById('dotnetVersion').value;
+      document.getElementById('sumStack').innerText = `${state.backend.toUpperCase()} (${verText || 'latest'})`;
+
+      // Auth display
+      const auth = document.getElementById('authEnabled').checked;
+      const roles = document.getElementById('roleAuthEnabled').checked;
+      if (auth && roles) document.getElementById('sumAuth').innerText = 'Active (Auth + Roles)';
+      else if (auth) document.getElementById('sumAuth').innerText = 'Auth Only';
+      else document.getElementById('sumAuth').innerText = 'Disabled';
     }
 
     function logToConsole(text) {
@@ -496,6 +534,16 @@
         stack: state.backend,
         database: state.database,
         styling: state.styling,
+        versions: {
+          laravel: document.getElementById('laravelVersion').value,
+          nodeExpress: document.getElementById('nodeVersion').value,
+          nextjs: document.getElementById('nextVersion').value,
+          dotnet: document.getElementById('dotnetVersion').value
+        },
+        auth: {
+          enabled: document.getElementById('authEnabled').checked,
+          roles: document.getElementById('roleAuthEnabled').checked
+        },
         components: {
           skeleton: document.getElementById('compSkeleton').checked,
           spinner: document.getElementById('compSpinner').checked,
@@ -527,6 +575,7 @@
       }
     }
 
+    syncVersionDropdownVisibility();
     updateSummary();
   </script>
 </body>

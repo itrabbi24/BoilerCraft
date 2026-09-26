@@ -186,18 +186,19 @@ async function generateProject(config, outputBasePath = null) {
     const srcDir = path.join(__dirname, '..', 'templates', 'dotnet-bootstrap-mssql');
     copyFolderRecursive(srcDir, targetDir, replaceMap);
 
-    // .csproj
+    const dotnetVer = config.versions?.dotnet || 'net8.0';
+    const efCoreVer = dotnetVer === 'net9.0' ? '9.0.*' : '8.0.*';
     const csproj = `<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>${dotnetVer}</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>${projectName.replace(/-/g, '_')}</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    ${database === 'mysql' ? '<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.*" />' : '<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.*" />'}
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.*" />
+    ${database === 'mysql' ? `<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="${efCoreVer}" />` : `<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="${efCoreVer}" />`}
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="${efCoreVer}" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 </Project>
@@ -302,17 +303,24 @@ app.Run();
     const srcDir = path.join(__dirname, '..', 'templates', 'laravel-full');
     copyFolderRecursive(srcDir, targetDir, replaceMap);
 
+    const chosenLaravelVer = config.versions?.laravel || '^11.0';
+    const isAuth = config.auth ? config.auth.enabled !== false : true;
+
     const laravelDeps = {
       "php": "^8.2",
-      "laravel/framework": "^11.0",
+      "laravel/framework": chosenLaravelVer,
       "laravel/tinker": "^2.9",
       "inertiajs/inertia-laravel": "^1.0"
     };
 
+    if (isAuth) {
+      laravelDeps["laravel/sanctum"] = "^4.0";
+    }
+
     const composerJson = {
       name: `developer/${projectName}`,
       type: "project",
-      description: config.description || "Laravel 11 Full Stack Project",
+      description: config.description || `Laravel ${chosenLaravelVer.replace(/[^0-9.]/g, '')} Full Stack Project`,
       keywords: ["framework", "laravel"],
       license: "MIT",
       require: laravelDeps,
@@ -377,9 +385,23 @@ app.Run();
     if (database === 'mysql') reqPkgs.push('mysql2');
     if (database === 'mssql') reqPkgs.push('mssql');
     if (styling === 'tailwind') reqPkgs.push('tailwindcss', 'postcss', 'autoprefixer');
-    if (styling === 'bootstrap') reqPkgs.push('bootstrap');
+    const chosenNextVer = config.versions?.nextjs || '^14.2.0';
+    const isAuth = config.auth ? config.auth.enabled !== false : true;
+
+    if (isAuth) {
+      reqPkgs.push('jsonwebtoken', 'bcryptjs');
+    }
 
     const deps = await resolveDependencies(reqPkgs, 'npm');
+    deps['next'] = chosenNextVer;
+    if (chosenNextVer.startsWith('^15')) {
+      deps['react'] = '^19.0.0';
+      deps['react-dom'] = '^19.0.0';
+    } else {
+      deps['react'] = '^18.3.1';
+      deps['react-dom'] = '^18.3.1';
+    }
+
     const pkg = {
       name: projectName,
       version: '1.0.0',
@@ -470,7 +492,16 @@ export default function Home() {
     if (database === 'mysql') reqPkgs.push('mysql2');
     if (database === 'mssql') reqPkgs.push('mssql');
 
+    const chosenExpressVer = config.versions?.nodeExpress || '^5.0.0';
+    const isAuth = config.auth ? config.auth.enabled !== false : true;
+
+    if (isAuth) {
+      reqPkgs.push('jsonwebtoken', 'bcryptjs');
+    }
+
     const deps = await resolveDependencies(reqPkgs, 'npm');
+    deps['express'] = chosenExpressVer;
+
     const pkg = {
       name: projectName,
       version: '1.0.0',
