@@ -1,188 +1,171 @@
-# ⚡ BoilerCraft — The Ultimate Multi-Stack Project Studio
+<div align="center">
 
-<p align="center">
-  <img src="public/favicon.ico" alt="BoilerCraft Logo" width="80" height="80" onerror="this.style.display='none'"/>
-</p>
+<img src="https://raw.githubusercontent.com/itrabbi24/BoilerCraft/main/assets/icon.png" alt="BoilerCraft" width="140" />
 
-<p align="center">
-  <strong>Craft production-ready enterprise boilerplates in seconds with real-time dependency resolution, modern UI kits, dynamic themes, and database engines.</strong>
-</p>
+# BoilerCraft
 
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#supported-stacks">Supported Stacks</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#desktop-gui">Desktop GUI</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#license">License</a>
-</p>
+**Production-ready projects in one command, built on each framework's official tooling.**
+<br />
+Any version · Authentication · Themes · Windows, macOS & Linux
 
----
-
-## ✨ Features
-
-- 🎯 **Visual Customizer Studio:** Set your project name, tagline, description, custom logo, author details, and custom server port.
-- ⚡ **Auto-Version & Dynamic Dependency Resolution:**
-  - Connects directly with **NPM Registry** & **Packagist (PHP)** APIs.
-  - Generates projects with the latest stable versions of packages (Next.js, React, Express, Laravel, Mongoose, etc.) without hardcoded obsolete versions.
-  - Safe fallback mechanism for offline usage.
-- 🎨 **Unified Design System & Curated Themes:**
-  - **Dark**, **Light**, and **System/Device Auto-Sync** modes.
-  - 4 Pre-tuned themes: *Slate Midnight*, *Cyber Emerald*, *Royal Indigo*, and *Crimson Amber*.
-- 🧩 **Ready-to-use Component Injection:**
-  - Skeleton Loaders (placeholder cards & tables)
-  - Spinners & Progress Indicators
-  - Action Dialogs & Modals (with blur backdrop)
-  - Offcanvas Navigation Drawers
-  - Styled for **Tailwind CSS**, **Bootstrap 5**, or pure **Vanilla CSS**.
-- 🖥️ **Run Anywhere:** Run directly in your terminal/browser or as a native **Electron Desktop Application**.
-
----
-
-## 🛠️ Supported Stacks & Complete Documentation
-
-Each generated project comes with its own customized guide. You can also explore the dedicated stack documentation directly:
-
-| Stack & Architecture | Databases | Included Features | Dedicated Documentation |
-|---|---|---|---|
-| **Raw PHP (MVC)** | MySQL, MSSQL, SQLite | QueryBuilder, Session Auth, Roles, .env | [📖 Raw PHP Guide](docs/stacks/raw-php.md) |
-| **.NET Core 8 Web API** | MSSQL, MySQL | EF Core, Swagger OpenAPI, JWT Auth, Claims | [📖 .NET Core Guide](docs/stacks/dotnet-core.md) |
-| **Next.js (App Router)** | MongoDB, MSSQL, MySQL | React Server Components, Route Handlers, Auth | [📖 Next.js Guide](docs/stacks/nextjs.md) |
-| **Node.js + Express** | MongoDB, MySQL, MSSQL | Clean Architecture, JWT Middleware, Error Handlers | [📖 Node.js Guide](docs/stacks/node-express.md) |
-| **Laravel 11 + Vue 3** | MySQL, MSSQL | Inertia.js, Vite, Vue 3 Composition API, Auth | [📖 Laravel Vue Guide](docs/stacks/laravel-vue.md) |
-
----
-
-## 🚀 Get started
+[![npm](https://img.shields.io/npm/v/boilercraft?color=22d3ee&label=npm)](https://www.npmjs.com/package/boilercraft)
+[![node](https://img.shields.io/badge/node-%E2%89%A518.3-3b82f6)](https://nodejs.org)
+[![platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-8b5cf6)](#)
+[![license](https://img.shields.io/badge/license-MIT-10b981)](LICENSE)
 
 ```bash
 npx boilercraft
 ```
 
-That's the only command you need. It works on Windows, macOS and Linux, needs only Node.js 18.3+, and there's nothing to clone or install first.
+<img src="https://raw.githubusercontent.com/itrabbi24/BoilerCraft/main/docs/assets/cli-menu.svg" alt="BoilerCraft main menu" width="760" />
 
-```text
-  ██████╗  ██████╗ ██╗██╗     ███████╗██████╗  ██████╗██████╗  █████╗ ███████╗████████╗
-  ...
-  by ARG RABBI   ·   v1.0.0
+</div>
 
-  ? What would you like to do?
-    ❯ Create a new project          Laravel · Next.js · Express · .NET · PHP
-      Check & install tools         PHP · Composer · .NET SDK
-      Browse frameworks & versions
-      Open the web studio           same features in your browser
-      About BoilerCraft
-      Exit
-```
+---
 
-Everything happens inside that menu. Use ↑/↓ to move and Enter to choose:
+## Why BoilerCraft
 
-| Menu | What it does |
-|---|---|
-| **Create a new project** | Name → framework → **version** (fetched live, so new releases appear automatically) → **auth** on/off → **theme** (Slate Midnight · Cyber Emerald · Royal Indigo · Crimson Amber) and dark/light mode → database → styling → summary → create. When it's done you can **start the dev server** or **open the project in VS Code** straight from the menu. |
-| **Check & install tools** | Shows what's installed and installs PHP, Composer or any .NET SDK version for you. |
-| **Browse frameworks & versions** | Every supported version, with LTS and recommended marked. |
-| **Open the web studio** | The same generator in your browser. |
+Most boilerplates are a frozen copy of someone's project. They go stale the day a new framework version ships. BoilerCraft works differently:
 
-Projects are created with each framework's **official tool** (`composer create-project`, `create-next-app`, `dotnet new`, `npm`), so they always match the version you picked. BoilerCraft then adds auth, database wiring and your theme on top.
+- **Always the real thing.** The base project is created by the framework's own creator (`composer create-project`, `create-next-app`, `dotnet new`, `npm`), so it matches the version you pick exactly.
+- **Any version, including future ones.** Versions are fetched live from npm, Packagist and the .NET release index. A new release shows up in the menu without an update to BoilerCraft.
+- **Ready to build on.** Auth, database wiring, a themed landing page and UI components are added on top, so you start with a working app instead of a blank one.
+- **One command, zero setup.** Everything happens inside `npx boilercraft`. Missing PHP, Composer or the .NET SDK? It offers to install them for you.
 
-### Missing PHP, Composer or the .NET SDK?
-
-BoilerCraft notices and offers to install it. You don't need to leave the menu:
-
-| Tool | How it is installed |
-|---|---|
-| .NET SDK | Microsoft's official `dotnet-install` script, exact version, user folder, no admin rights |
-| Composer | Official installer (signature-verified), user folder |
-| PHP | `winget` (Windows) · Homebrew (macOS) · apt / dnf / pacman (Linux) |
-
-Tools in the user folder live in `~/.boilercraft/tools` and are added to your user PATH.
-
-<details>
-<summary>Automation (scripts / CI, no prompts)</summary>
+## Quick start
 
 ```bash
-npx boilercraft new shop -s laravel -v 12 -t emerald -d mysql -y
-npx boilercraft new api  -s dotnet-core -v 10 --no-auth -y --install-tools
+npx boilercraft
+```
+
+Choose **Create a new project** and answer a few questions (↑/↓ to move, Enter to select):
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/itrabbi24/BoilerCraft/main/docs/assets/cli-create.svg" alt="Creating a Laravel project" width="760" />
+</div>
+
+When it's done, pick **Start the dev server** or **Open in VS Code** from the same menu. You don't need to type `cd` or any other command.
+
+## What you can create
+
+| Framework | Versions | Choices | Databases | Auth |
+|---|---|---|---|---|
+| **Laravel** | 10 – 13 | Blade · Vue 3 (Inertia) · React (Inertia) | MySQL · SQL Server | Sanctum API tokens, or full Breeze UI (login, register, profile) for Vue/React |
+| **Next.js** | 14 – 16 | App Router · Pages Router | MongoDB · MySQL · SQL Server | JWT register/login API routes |
+| **.NET** | 8 – 10 | MVC (Model · View · Controller) · Web API | SQL Server · MySQL | MVC: cookie login/register pages · API: JWT + Swagger |
+| **Node.js + Express** | 4 – 5 | — | MySQL · MongoDB · SQL Server | JWT middleware with roles |
+| **Raw PHP (MVC)** | — | — | MySQL | Session auth |
+
+Every project also gets:
+- A **theme**: Slate Midnight, Cyber Emerald, Royal Indigo or Crimson Amber, in dark, light or both with a toggle.
+- **Styling** with Tailwind CSS, Bootstrap 5 or plain CSS.
+- Optional **UI components**: skeleton loaders, spinners, modals, off-canvas drawers.
+
+The version list above is just what's verified today. Newer releases appear automatically and are marked *preview support* until verified.
+
+## Missing a toolchain?
+
+BoilerCraft checks what's installed and offers to set up the rest. You can also do it any time from **Check & install tools** in the menu.
+
+| Tool | Needed for | How BoilerCraft installs it |
+|---|---|---|
+| .NET SDK | .NET | Microsoft's official `dotnet-install` script, exact version, user folder, **no admin rights** |
+| Composer | Laravel | Official installer, signature-verified, user folder |
+| PHP | Laravel, Raw PHP | `winget` (Windows) · Homebrew (macOS) · apt / dnf / pacman (Linux) |
+| Node.js | Next.js, Express | Already there, since `npx` runs on it |
+
+Tools installed into the user folder live in `~/.boilercraft/tools` and are added to your user PATH.
+
+## Web studio
+
+Prefer a browser? Choose **Open the web studio** in the menu. You get the same generator as a visual form at `http://localhost:4800`.
+
+<details>
+<summary><b>Automation (scripts and CI)</b></summary>
+
+<br />
+
+Every question has a flag. Anything you leave out is asked interactively, or takes its default with `-y`.
+
+```bash
+npx boilercraft new shop  -s laravel -v 13 --frontend vue -t emerald -d mysql -y
+npx boilercraft new web   -s nextjs --router pages --no-auth -d mongodb -y
+npx boilercraft new admin -s dotnet-core -v 10 --template mvc -y --install-tools
 npx boilercraft --help
 ```
 
-Flags you leave out are asked interactively, or take their defaults with `-y`. See [docs/STACK_ENGINE.md](docs/STACK_ENGINE.md) for how versions are managed.
 </details>
 
 <details>
-<summary>Working on BoilerCraft itself</summary>
+<summary><b>How new framework versions are handled</b></summary>
 
-```bash
-git clone https://github.com/itrabbi24/BoilerCraft.git
-cd BoilerCraft && npm install
-node bin/boilercraft.js       # or: npm link, then `boilercraft`
-```
+<br />
 
-To release: bump `version` in package.json, then push a tag `vX.Y.Z`. The GitHub Action smoke-tests on Windows, macOS and Linux, then publishes to npm (needs the `NPM_TOKEN` secret).
+Each framework is described by a small manifest in [`stacks/<id>/stack.json`](stacks). It covers where versions come from, which official creator to run, and which BoilerCraft files to add, and each step can be limited to certain versions. In practice:
+
+- **A new release usually needs nothing.** It appears in the menu automatically.
+- **If a release changes something BoilerCraft relies on,** one version-scoped rule is added to the manifest. No code change is needed.
+
+Full reference: [docs/STACK_ENGINE.md](docs/STACK_ENGINE.md).
+
 </details>
 
----
+<details>
+<summary><b>Project structure</b></summary>
 
-<!--
-  Desktop app (Electron) — DEPRECATED in favour of the cross-platform CLI above.
-  main.js and the electron scripts are kept so it can be revived.
-
-## 💻 Desktop Application (Electron)
-
-To launch as a native Windows / Mac / Linux desktop application:
-
-```bash
-npm run desktop
-```
--->
-
----
-
-## 📁 Project Architecture
+<br />
 
 ```text
 BoilerCraft/
-├── main.js                   # Electron Desktop entry point
-├── server.js                 # Studio API & Web server (Express)
-├── bin/boilercraft.js        # CLI entry (`npx boilercraft`)
-├── cli/                      # Interactive menus, banner, prompts (ui.js, app.js)
-├── stacks/<id>/stack.json    # Per-stack manifest: versions, official creator, overlays
+├── bin/boilercraft.js        # CLI entry (npx boilercraft)
+├── cli/                      # Interactive menus, banner and prompts
+├── stacks/<id>/              # One folder per framework
+│   ├── stack.json            #   versions, official creator, version-scoped steps
+│   └── overlays/             #   files BoilerCraft adds on top
 ├── services/
-│   ├── engine/               # Manifest runner + live version catalog
-│   ├── generate.js           # Shared entry (engine, with template fallback)
-│   ├── projectGenerator.js   # Master multi-stack project generator
-│   ├── versionResolver.js    # Live NPM & Packagist API version fetcher
-│   ├── themeGenerator.js     # CSS variables & theme switcher engine
-│   └── componentGenerator.js # Skeleton, Modal, Spinner & Drawer templates
-├── public/
-│   └── index.html            # Interactive visual studio wizard UI
-├── package.json
-└── README.md
+│   ├── engine/               # Manifest runner, live version catalog, tool installer
+│   ├── generate.js           # Shared entry for the CLI and web studio
+│   ├── themeGenerator.js     # Theme palettes and dark/light CSS
+│   └── componentGenerator.js # Skeleton, spinner, modal and drawer components
+├── templates/                # Offline fallback templates (and Raw PHP)
+├── public/index.html         # Web studio
+└── server.js                 # Web studio API
 ```
 
----
+</details>
 
-## 👨‍💻 Developer & Creator
+<details>
+<summary><b>Working on BoilerCraft</b></summary>
 
-Developed with ❤️ by **[ARG RABBI](https://github.com/itrabbi24)**  
-- GitHub: [@itrabbi24](https://github.com/itrabbi24)
-- Repository: [BoilerCraft](https://github.com/itrabbi24/BoilerCraft)
+<br />
 
----
+```bash
+git clone https://github.com/itrabbi24/BoilerCraft.git
+cd BoilerCraft
+npm install
+node bin/boilercraft.js
+```
 
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/itrabbi24/BoilerCraft/issues).
+To test exactly what npm users get: run `npm pack`, then `npx --package=./boilercraft-<version>.tgz boilercraft` in an empty folder.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+**Releasing:** bump `version` in `package.json`, then run `npm publish`. Alternatively, push a `vX.Y.Z` tag: GitHub Actions smoke-tests on Windows, macOS and Linux and then publishes (requires the `NPM_TOKEN` repository secret).
 
----
+</details>
 
-## 📝 License
-Distributed under the **MIT License**. See `LICENSE` for more information.
-Copyright (c) 2026 ARG RABBI.
+## Contributing
 
+Issues and pull requests are welcome. Please see the [issues page](https://github.com/itrabbi24/BoilerCraft/issues).
+
+1. Fork the repository.
+2. Create a branch: `git checkout -b feature/my-feature`.
+3. Commit your changes and open a pull request.
+
+## Author
+
+**ARG RABBI** · [@itrabbi24](https://github.com/itrabbi24)
+
+If BoilerCraft saves you time, a ⭐ on [GitHub](https://github.com/itrabbi24/BoilerCraft) is appreciated.
+
+## License
+
+[MIT](LICENSE) © 2026 ARG RABBI

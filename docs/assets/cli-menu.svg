@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="880" height="500" viewBox="0 0 880 500" role="img" aria-label="BoilerCraft CLI main menu">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="0.5" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 15px; }
+    .dim { fill: #7d8590; }
+    .txt { fill: #e6edf3; }
+    .cyan { fill: #22d3ee; }
+    .green { fill: #3fb950; }
+    .bold { font-weight: 700; }
+  </style>
+
+  <rect x="10" y="6" width="860" height="484" rx="12" fill="#0d1117" stroke="#30363d" filter="url(#shadow)"/>
+  <rect x="10" y="6" width="860" height="38" rx="12" fill="#161b22"/>
+  <rect x="10" y="32" width="860" height="12" fill="#161b22"/>
+  <circle cx="36" cy="25" r="6" fill="#ff5f57"/>
+  <circle cx="56" cy="25" r="6" fill="#febc2e"/>
+  <circle cx="76" cy="25" r="6" fill="#28c840"/>
+  <text x="440" y="30" text-anchor="middle" class="mono dim" font-size="13">Terminal</text>
+
+  <text x="40" y="80" class="mono"><tspan class="green">$</tspan><tspan class="txt"> npx boilercraft</tspan></text>
+
+  <text x="40" y="150" font-family="'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="58" font-weight="900" letter-spacing="7" fill="url(#brand)">BOILERCRAFT</text>
+
+  <text x="42" y="186" class="mono"><tspan class="dim">by </tspan><tspan class="txt bold">ARG RABBI</tspan><tspan class="dim">   ·   v1.0.0</tspan></text>
+  <text x="42" y="210" class="mono dim">Production-ready projects on the official tooling · any version · auth · themes</text>
+
+  <text x="42" y="258" class="mono"><tspan class="cyan">?</tspan><tspan class="txt bold"> What would you like to do?</tspan><tspan class="dim"> · ↑↓ to move, enter to select</tspan></text>
+
+  <text x="62" y="292" class="mono"><tspan class="cyan bold">❯ Create a new project</tspan></text>
+  <text x="400" y="292" class="mono dim">Laravel · Next.js · Express · .NET · PHP</text>
+  <text x="62" y="320" class="mono txt">  Check &amp; install tools</text>
+  <text x="400" y="320" class="mono dim">PHP · Composer · .NET SDK</text>
+  <text x="62" y="348" class="mono txt">  Browse frameworks &amp; versions</text>
+  <text x="62" y="376" class="mono txt">  Open the web studio</text>
+  <text x="400" y="376" class="mono dim">same features in your browser</text>
+  <text x="62" y="404" class="mono txt">  About BoilerCraft</text>
+  <text x="62" y="432" class="mono txt">  Exit</text>
+</svg>

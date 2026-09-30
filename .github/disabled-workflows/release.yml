@@ -1,6 +1,7 @@
 # DISABLED: BoilerCraft now ships as a cross-platform CLI (`npx boilercraft`),
-# so the Windows-only portable .exe is no longer built. Kept for reference;
-# uncomment to bring the desktop build back. npm publishing lives in publish.yml.
+# so the Windows-only portable .exe is no longer built. This file lives outside
+# .github/workflows so GitHub does not run it. To revive the desktop build, move
+# it back to .github/workflows/ and uncomment. npm publishing is in publish.yml.
 #
 # name: Build & Release Portable Executable
 #

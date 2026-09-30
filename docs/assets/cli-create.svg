@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="880" height="600" viewBox="0 0 880 600" role="img" aria-label="Creating a Laravel project with BoilerCraft">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 15px; }
+    .dim { fill: #7d8590; }
+    .txt { fill: #e6edf3; }
+    .cyan { fill: #22d3ee; }
+    .green { fill: #3fb950; }
+    .bold { font-weight: 700; }
+  </style>
+
+  <rect x="10" y="6" width="860" height="584" rx="12" fill="#0d1117" stroke="#30363d" filter="url(#shadow)"/>
+  <rect x="10" y="6" width="860" height="38" rx="12" fill="#161b22"/>
+  <rect x="10" y="32" width="860" height="12" fill="#161b22"/>
+  <circle cx="36" cy="25" r="6" fill="#ff5f57"/>
+  <circle cx="56" cy="25" r="6" fill="#febc2e"/>
+  <circle cx="76" cy="25" r="6" fill="#28c840"/>
+  <text x="440" y="30" text-anchor="middle" class="mono dim" font-size="13">Terminal</text>
+
+  <!-- answered questions -->
+  <text x="40" y="82" class="mono"><tspan class="green">✔</tspan><tspan class="txt bold"> Project name</tspan><tspan class="dim"> · </tspan><tspan class="cyan">shop</tspan></text>
+  <text x="40" y="108" class="mono"><tspan class="green">✔</tspan><tspan class="txt bold"> Framework</tspan><tspan class="dim"> · </tspan><tspan class="cyan">Laravel</tspan></text>
+  <text x="40" y="134" class="mono"><tspan class="green">✔</tspan><tspan class="txt bold"> Laravel version</tspan><tspan class="dim"> · </tspan><tspan class="cyan">13.x</tspan></text>
+  <text x="40" y="160" class="mono"><tspan class="green">✔</tspan><tspan class="txt bold"> Frontend</tspan><tspan class="dim"> · </tspan><tspan class="cyan">Vue 3 (Inertia)</tspan></text>
+  <text x="40" y="186" class="mono"><tspan class="green">✔</tspan><tspan class="txt bold"> Authentication</tspan><tspan class="dim"> · </tspan><tspan class="cyan">Included</tspan></text>
+  <text x="40" y="212" class="mono"><tspan class="green">✔</tspan><tspan class="txt bold"> Theme</tspan><tspan class="dim"> · </tspan><tspan class="cyan">Cyber Emerald</tspan></text>
+
+  <!-- summary box -->
+  <rect x="40" y="234" width="470" height="170" rx="8" fill="none" stroke="#22d3ee" stroke-opacity="0.7"/>
+  <rect x="56" y="226" width="86" height="16" fill="#0d1117"/>
+  <text x="62" y="239" class="mono txt bold">Summary</text>
+  <text x="60" y="266" class="mono"><tspan class="dim">Framework  </tspan><tspan class="txt">Laravel 13.x</tspan></text>
+  <text x="60" y="290" class="mono"><tspan class="dim">Frontend   </tspan><tspan class="txt">Vue 3 (Inertia)</tspan></text>
+  <text x="60" y="314" class="mono"><tspan class="dim">Auth       </tspan><tspan class="txt">Included</tspan></text>
+  <text x="60" y="338" class="mono"><tspan class="dim">Theme      </tspan></text>
+  <rect x="160" y="326" width="16" height="14" rx="2" fill="#10b981"/>
+  <text x="184" y="338" class="mono txt">Cyber Emerald · Dark + Light</text>
+  <text x="60" y="362" class="mono"><tspan class="dim">Database   </tspan><tspan class="txt">MySQL</tspan></text>
+  <text x="60" y="386" class="mono"><tspan class="dim">Location   </tspan><tspan class="dim">./shop</tspan></text>
+
+  <!-- progress -->
+  <text x="40" y="440" class="mono"><tspan class="green">✔</tspan><tspan class="txt"> Running official composer create-project laravel/laravel:^13.0</tspan></text>
+  <text x="40" y="466" class="mono"><tspan class="green">✔</tspan><tspan class="txt"> Installing Laravel Breeze (vue) with authentication</tspan></text>
+  <text x="40" y="492" class="mono"><tspan class="green">✔</tspan><tspan class="txt"> Running php artisan breeze:install vue</tspan></text>
+
+  <text x="40" y="534" class="mono"><tspan class="green">✔</tspan><tspan class="txt bold"> shop</tspan><tspan class="txt"> is ready</tspan></text>
+  <text x="40" y="566" class="mono"><tspan class="cyan">?</tspan><tspan class="txt bold"> What next?</tspan><tspan class="cyan bold">  ❯ Start the dev server</tspan><tspan class="dim">   Open in VS Code   Exit</tspan></text>
+</svg>
