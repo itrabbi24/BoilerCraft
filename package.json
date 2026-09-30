@@ -1,13 +1,14 @@
 {
   "name": "boilercraft",
   "version": "1.0.0",
-  "description": "The Ultimate Open Source Multi-Stack Boilerplate Generator Studio",
+  "description": "Create Laravel, Next.js, Express and .NET projects with the official tooling — any version, auth, themes. Run: npx boilercraft",
   "main": "main.js",
   "scripts": {
     "start": "node server.js",
     "desktop": "electron .",
     "dev": "node server.js",
-    "build:exe": "electron-builder --win portable"
+    "build:exe": "electron-builder --win portable",
+    "cli": "node bin/boilercraft.js"
   },
   "build": {
     "appId": "com.argrabbi.boilercraft",
@@ -36,7 +37,11 @@
     "laravel",
     "nodejs",
     "dotnet",
-    "generator"
+    "generator",
+    "cli",
+    "scaffold",
+    "create-app",
+    "npx"
   ],
   "author": "ARG RABBI",
   "license": "MIT",
@@ -46,13 +51,36 @@
     "axios": "^1.20.0",
     "cors": "^2.8.6",
     "ejs": "^6.0.1",
-    "electron-updater": "^6.8.9",
     "express": "^5.2.1"
   },
   "devDependencies": {
     "concurrently": "^10.0.5",
     "electron": "^44.4.5",
     "electron-builder": "^26.15.3",
-    "wait-on": "^9.1.0"
-  }
+    "wait-on": "^9.1.0",
+    "electron-updater": "^6.8.9"
+  },
+  "bin": {
+    "boilercraft": "bin/boilercraft.js"
+  },
+  "engines": {
+    "node": ">=18.3"
+  },
+  "files": [
+    "bin/",
+    "cli/",
+    "services/",
+    "stacks/",
+    "templates/",
+    "public/",
+    "docs/",
+    "server.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itrabbi24/BoilerCraft.git"
+  },
+  "homepage": "https://github.com/itrabbi24/BoilerCraft#readme"
 }
