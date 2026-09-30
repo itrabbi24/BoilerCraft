@@ -9,7 +9,7 @@
     "dev": "node server.js",
     "build:exe": "electron-builder --win portable",
     "cli": "node bin/boilercraft.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/engine.test.js test/extras.test.js test/cli-services.test.js"
   },
   "build": {
     "appId": "com.argrabbi.boilercraft",
