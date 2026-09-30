@@ -1,0 +1,4 @@
+# Keep LF everywhere: the CLI shebang breaks on macOS/Linux with CRLF.
+* text=auto eol=lf
+*.png binary
+*.ico binary
