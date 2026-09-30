@@ -1,0 +1,477 @@
+{
+  "id": "laravel",
+  "name": "Laravel",
+  "aliases": [
+    "laravel-vue-mysql"
+  ],
+  "defaultPort": 8000,
+  "databases": [
+    "mysql",
+    "mssql"
+  ],
+  "stylings": [
+    "tailwind",
+    "bootstrap",
+    "vanilla"
+  ],
+  "options": [
+    {
+      "id": "frontend",
+      "label": "Frontend",
+      "default": "blade",
+      "choices": [
+        {
+          "value": "blade",
+          "label": "Blade",
+          "hint": "server-rendered · classic Laravel"
+        },
+        {
+          "value": "vue",
+          "label": "Vue 3 (Inertia)",
+          "hint": "SPA feel, Laravel routing"
+        },
+        {
+          "value": "react",
+          "label": "React (Inertia)",
+          "hint": "SPA feel, Laravel routing"
+        }
+      ]
+    }
+  ],
+  "nextSteps": [
+    "php artisan migrate",
+    "php artisan serve --port={{PORT}}"
+  ],
+  "versions": {
+    "source": "packagist",
+    "package": "laravel/laravel",
+    "minMajor": 10,
+    "testedUpTo": 13,
+    "offline": [
+      13,
+      12,
+      11,
+      10
+    ]
+  },
+  "requires": [
+    {
+      "cmd": "php",
+      "args": [
+        "-v"
+      ],
+      "name": "PHP",
+      "install": "https://www.php.net/downloads (or XAMPP / WAMP / Laragon / Herd)"
+    },
+    {
+      "cmd": "composer",
+      "name": "Composer",
+      "install": "https://getcomposer.org/download/"
+    }
+  ],
+  "steps": [
+    {
+      "label": "Running official composer create-project laravel/laravel:^{{VERSION}}.0",
+      "cwd": "parent",
+      "run": [
+        "composer",
+        "create-project",
+        "laravel/laravel:^{{VERSION}}.0",
+        "{{PROJECT_NAME}}",
+        "--prefer-dist",
+        "--no-interaction"
+      ]
+    },
+    {
+      "env": {
+        "APP_NAME": "{{APP_TITLE_JS}}"
+      }
+    },
+    {
+      "when": {
+        "database": "mysql"
+      },
+      "env": {
+        "DB_CONNECTION": "mysql",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "3306",
+        "DB_DATABASE": "{{DB_NAME}}",
+        "DB_USERNAME": "root",
+        "DB_PASSWORD": ""
+      }
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "env": {
+        "DB_CONNECTION": "sqlsrv",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "1433",
+        "DB_DATABASE": "{{DB_NAME}}",
+        "DB_USERNAME": "sa"
+      }
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "env": {
+        "DB_PASSWORD": "{{RANDOM_PASSWORD}}"
+      },
+      "files": [
+        ".env"
+      ]
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "env": {
+        "DB_PASSWORD": "change-me"
+      },
+      "files": [
+        ".env.example"
+      ]
+    },
+    {
+      "label": "Applying BoilerCraft overlay",
+      "copy": "overlays/common",
+      "when": {
+        "frontend": "blade"
+      }
+    },
+    {
+      "write": "public/css/boilercraft-theme.css",
+      "content": "{{THEME_CSS}}"
+    },
+    {
+      "write": "public/js/boilercraft-theme.js",
+      "content": "{{THEME_JS}}"
+    },
+    {
+      "append": "routes/web.php",
+      "from": "snippets/web-routes.php",
+      "when": {
+        "frontend": "blade"
+      }
+    },
+    {
+      "label": "Installing API scaffolding (Sanctum) via php artisan install:api",
+      "when": {
+        "auth": true,
+        "version": ">=11",
+        "frontend": "blade"
+      },
+      "run": [
+        "php",
+        "artisan",
+        "install:api",
+        "--no-interaction",
+        "--without-migration-prompt"
+      ]
+    },
+    {
+      "when": {
+        "auth": true,
+        "version": ">=11",
+        "frontend": "blade"
+      },
+      "replace": "app/Models/User.php",
+      "skipIfContains": "HasApiTokens",
+      "find": "use HasFactory, Notifiable;",
+      "with": "use \\Laravel\\Sanctum\\HasApiTokens, HasFactory, Notifiable;"
+    },
+    {
+      "when": {
+        "auth": true,
+        "frontend": "blade"
+      },
+      "copy": "overlays/auth"
+    },
+    {
+      "when": {
+        "auth": true,
+        "frontend": "blade"
+      },
+      "append": "routes/api.php",
+      "from": "snippets/api-routes.php"
+    },
+    {
+      "label": "Installing Laravel Breeze ({{OPTION_FRONTEND}}) with authentication",
+      "when": {
+        "auth": true,
+        "frontend": [
+          "vue",
+          "react"
+        ]
+      },
+      "run": [
+        "composer",
+        "require",
+        "laravel/breeze",
+        "--dev",
+        "--no-interaction"
+      ]
+    },
+    {
+      "label": "Running php artisan breeze:install {{OPTION_FRONTEND}}",
+      "when": {
+        "auth": true,
+        "frontend": [
+          "vue",
+          "react"
+        ]
+      },
+      "run": [
+        "php",
+        "artisan",
+        "breeze:install",
+        "{{OPTION_FRONTEND}}",
+        "--no-interaction"
+      ]
+    },
+    {
+      "label": "Installing Inertia (server side)",
+      "when": {
+        "auth": false,
+        "frontend": [
+          "vue",
+          "react"
+        ]
+      },
+      "run": [
+        "composer",
+        "require",
+        "inertiajs/inertia-laravel",
+        "--no-interaction"
+      ]
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": [
+          "vue",
+          "react"
+        ]
+      },
+      "run": [
+        "php",
+        "artisan",
+        "inertia:middleware",
+        "--no-interaction"
+      ]
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": [
+          "vue",
+          "react"
+        ],
+        "version": ">=11"
+      },
+      "replace": "bootstrap/app.php",
+      "skipIfContains": "HandleInertiaRequests",
+      "findRegex": "->withMiddleware\\(function \\(Middleware \\$middleware\\)(: void)? \\{",
+      "with": "$&\n        $middleware->web(append: [\\App\\Http\\Middleware\\HandleInertiaRequests::class]);"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": [
+          "vue",
+          "react"
+        ],
+        "version": "<11"
+      },
+      "replace": "app/Http/Kernel.php",
+      "skipIfContains": "HandleInertiaRequests",
+      "find": "'web' => [",
+      "with": "$&\n            \\App\\Http\\Middleware\\HandleInertiaRequests::class,"
+    },
+    {
+      "label": "Installing Vue 3 + Inertia (client side)",
+      "when": {
+        "auth": false,
+        "frontend": "vue"
+      },
+      "run": [
+        "npm",
+        "install",
+        "-D",
+        "{{VITE_PLUGIN_VUE}}",
+        "vue",
+        "@inertiajs/vue3"
+      ]
+    },
+    {
+      "label": "Installing React + Inertia (client side)",
+      "when": {
+        "auth": false,
+        "frontend": "react"
+      },
+      "run": [
+        "npm",
+        "install",
+        "-D",
+        "{{VITE_PLUGIN_REACT}}",
+        "react",
+        "react-dom",
+        "@inertiajs/react"
+      ]
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "vue"
+      },
+      "replace": "vite.config.js",
+      "skipIfContains": "@vitejs/plugin-vue",
+      "find": "import laravel from 'laravel-vite-plugin';",
+      "with": "import laravel from 'laravel-vite-plugin';\nimport vue from '@vitejs/plugin-vue';"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "vue"
+      },
+      "replace": "vite.config.js",
+      "skipIfContains": "vue({",
+      "find": "plugins: [",
+      "with": "$&\n        vue({ template: { transformAssetUrls: { base: null, includeAbsolute: false } } }),"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "react"
+      },
+      "replace": "vite.config.js",
+      "skipIfContains": "@vitejs/plugin-react",
+      "find": "import laravel from 'laravel-vite-plugin';",
+      "with": "import laravel from 'laravel-vite-plugin';\nimport react from '@vitejs/plugin-react';"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "react"
+      },
+      "replace": "vite.config.js",
+      "skipIfContains": "react(),",
+      "find": "plugins: [",
+      "with": "$&\n        react(),"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "react"
+      },
+      "replace": "vite.config.js",
+      "find": "resources/js/app.js'",
+      "with": "resources/js/app.jsx'"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "react"
+      },
+      "remove": "resources/js/app.js"
+    },
+    {
+      "label": "Applying BoilerCraft Inertia pages",
+      "when": {
+        "auth": false,
+        "frontend": [
+          "vue",
+          "react"
+        ]
+      },
+      "copy": "overlays/inertia-common"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "vue"
+      },
+      "copy": "overlays/inertia-vue"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": "react"
+      },
+      "copy": "overlays/inertia-react"
+    },
+    {
+      "when": {
+        "auth": false,
+        "frontend": [
+          "vue",
+          "react"
+        ]
+      },
+      "append": "routes/web.php",
+      "from": "snippets/web-routes-inertia.php"
+    },
+    {
+      "label": "Building frontend assets",
+      "when": {
+        "auth": false,
+        "frontend": [
+          "vue",
+          "react"
+        ]
+      },
+      "optional": true,
+      "run": [
+        "npm",
+        "run",
+        "build"
+      ]
+    }
+  ],
+  "vars": [
+    {
+      "name": "VITE_TAGS",
+      "when": {
+        "frontend": "vue"
+      },
+      "value": "@vite(['resources/css/app.css', 'resources/js/app.js'])"
+    },
+    {
+      "name": "VITE_TAGS",
+      "when": {
+        "frontend": "react"
+      },
+      "value": "@viteReactRefresh\n    @vite(['resources/css/app.css', 'resources/js/app.jsx'])"
+    },
+    {
+      "name": "VITE_PLUGIN_VUE",
+      "when": {
+        "version": "<11"
+      },
+      "value": "@vitejs/plugin-vue@^4"
+    },
+    {
+      "name": "VITE_PLUGIN_VUE",
+      "when": {
+        "version": ">=11"
+      },
+      "value": "@vitejs/plugin-vue"
+    },
+    {
+      "name": "VITE_PLUGIN_REACT",
+      "when": {
+        "version": "<11"
+      },
+      "value": "@vitejs/plugin-react@^4"
+    },
+    {
+      "name": "VITE_PLUGIN_REACT",
+      "when": {
+        "version": ">=11"
+      },
+      "value": "@vitejs/plugin-react"
+    }
+  ]
+}

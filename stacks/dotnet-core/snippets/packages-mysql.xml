@@ -1,0 +1,4 @@
+  <ItemGroup>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="{{VERSION}}.0.*" />
+  </ItemGroup>
+

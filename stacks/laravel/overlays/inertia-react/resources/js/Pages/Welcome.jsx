@@ -1,0 +1,18 @@
+export default function Welcome({ laravelVersion, database }) {
+    return (
+        <div style={{ maxWidth: '900px', margin: '3rem auto', padding: '1rem', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>{{APP_TITLE}}</h1>
+            <p style={{ color: 'var(--color-text-muted)' }}>{{APP_DESC}}</p>
+
+            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--color-surface)', borderRadius: '1rem', textAlign: 'left', border: '1px solid var(--color-border)' }}>
+                <h3>Configured Architecture:</h3>
+                <ul>
+                    <li><strong>Framework:</strong> Laravel {laravelVersion} + React (Inertia)</li>
+                    <li><strong>Database connection:</strong> {database}</li>
+                    <li><strong>Styling:</strong> {{STYLING}}</li>
+                    <li><strong>Theme:</strong> {{THEME}}</li>
+                </ul>
+            </div>
+        </div>
+    );
+}

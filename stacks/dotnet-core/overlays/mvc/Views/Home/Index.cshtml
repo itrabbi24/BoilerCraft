@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div style="max-width: 900px; margin: 0 auto; text-align: center;">
+    <h1 class="display-5 fw-bold">{{APP_TITLE}}</h1>
+    <p style="color: var(--color-text-muted);">{{APP_DESC}}</p>
+
+    <div class="my-4">
+        <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg">Manage products →</a>
+    </div>
+
+    <div style="text-align: left; padding: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-base); margin-top: 2rem;">
+        <h3 style="margin-top: 0;">Active Architecture:</h3>
+        <ul>
+            <li><strong>Framework:</strong> ASP.NET Core MVC (.NET {{VERSION}})</li>
+            <li><strong>Database:</strong> {{DATABASE}} (EF Core)</li>
+            <li><strong>Theme:</strong> {{THEME}}</li>
+        </ul>
+        <hr style="border: none; border-top: 1px solid var(--color-border); margin: 1.5rem 0;" />
+        {{UI_COMPONENTS_RAZOR}}
+    </div>
+</div>

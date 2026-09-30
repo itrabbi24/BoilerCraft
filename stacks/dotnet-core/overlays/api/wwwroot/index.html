@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{COLOR_MODE}}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{APP_TITLE}}</title>
+    <link rel="stylesheet" href="/theme.css">
+    {{STYLESHEET_LINK}}
+</head>
+<body class="p-8">
+    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+        {{LOGO_HTML}}
+        <h1 style="font-size: 2.5rem; font-weight: 800;">{{APP_TITLE}}</h1>
+        <p style="color: var(--color-text-muted);">{{APP_DESC}}</p>
+        <p style="font-size: 0.85rem; color: var(--color-primary); font-weight: bold;">Developer: {{AUTHOR}}</p>
+
+        <div style="margin: 1.5rem 0;">
+            <a href="/swagger" style="padding: 10px 20px; background: var(--color-primary); color: white; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                Explore Swagger API ↗
+            </a>
+        </div>
+
+        <div style="text-align: left; padding: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-base); margin-top: 2rem;">
+            <h3 style="margin-top: 0;">Active Architecture:</h3>
+            <ul>
+                <li><strong>Backend:</strong> ASP.NET Core Web API (.NET {{VERSION}})</li>
+                <li><strong>Database:</strong> {{DATABASE}} (EF Core)</li>
+                <li><strong>Styling:</strong> {{STYLING}}</li>
+                <li><strong>Theme:</strong> {{THEME}}</li>
+            </ul>
+            <hr style="border: none; border-top: 1px solid var(--color-border); margin: 1.5rem 0;" />
+            <h4>Components:</h4>
+            {{UI_COMPONENTS}}
+        </div>
+    </div>
+    <script src="/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="{{VERSION}}.0.*" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="{{SWASHBUCKLE_VERSION}}" />
+  </ItemGroup>
+

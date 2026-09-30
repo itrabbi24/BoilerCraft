@@ -1,0 +1,165 @@
+{
+  "id": "node-express",
+  "name": "Node.js + Express",
+  "defaultPort": 5000,
+  "databases": [
+    "mysql",
+    "mongodb",
+    "mssql"
+  ],
+  "stylings": [
+    "tailwind",
+    "bootstrap",
+    "vanilla"
+  ],
+  "nextSteps": [
+    "npm run dev"
+  ],
+  "versions": {
+    "source": "npm",
+    "package": "express",
+    "minMajor": 4,
+    "testedUpTo": 5,
+    "offline": [
+      5,
+      4
+    ]
+  },
+  "requires": [
+    {
+      "cmd": "node",
+      "name": "Node.js",
+      "install": "https://nodejs.org"
+    },
+    {
+      "cmd": "npm",
+      "name": "npm",
+      "install": "Ships with Node.js"
+    }
+  ],
+  "vars": [
+    {
+      "name": "AUTH_REQUIRE",
+      "when": {
+        "auth": true
+      },
+      "value": "const authRoutes = require('./routes/authRoutes');"
+    },
+    {
+      "name": "AUTH_MOUNT",
+      "when": {
+        "auth": true
+      },
+      "value": "app.use('/api/auth', authRoutes);"
+    }
+  ],
+  "steps": [
+    {
+      "label": "Creating package.json",
+      "run": [
+        "npm",
+        "init",
+        "-y"
+      ]
+    },
+    {
+      "label": "Installing Express {{VERSION}}.x and core packages",
+      "run": [
+        "npm",
+        "install",
+        "express@{{VERSION}}",
+        "dotenv",
+        "cors"
+      ]
+    },
+    {
+      "when": {
+        "database": "mongodb"
+      },
+      "run": [
+        "npm",
+        "install",
+        "mongoose"
+      ]
+    },
+    {
+      "when": {
+        "database": "mysql"
+      },
+      "run": [
+        "npm",
+        "install",
+        "mysql2"
+      ]
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "run": [
+        "npm",
+        "install",
+        "mssql"
+      ]
+    },
+    {
+      "when": {
+        "auth": true
+      },
+      "run": [
+        "npm",
+        "install",
+        "jsonwebtoken",
+        "bcryptjs"
+      ]
+    },
+    {
+      "json": "package.json",
+      "merge": {
+        "description": "{{APP_DESC}}",
+        "author": "{{AUTHOR}}",
+        "main": "src/server.js",
+        "scripts": {
+          "start": "node src/server.js",
+          "dev": "node --watch src/server.js"
+        }
+      }
+    },
+    {
+      "label": "Applying BoilerCraft overlay",
+      "copy": "overlays/common"
+    },
+    {
+      "when": {
+        "database": "mongodb"
+      },
+      "copy": "overlays/db/mongodb"
+    },
+    {
+      "when": {
+        "database": "mysql"
+      },
+      "copy": "overlays/db/mysql"
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "copy": "overlays/db/mssql"
+    },
+    {
+      "when": {
+        "auth": true
+      },
+      "copy": "overlays/auth"
+    },
+    {
+      "write": "public/theme.css",
+      "content": "{{THEME_CSS}}"
+    },
+    {
+      "write": "public/theme.js",
+      "content": "{{THEME_JS}}"
+    }
+  ]
+}

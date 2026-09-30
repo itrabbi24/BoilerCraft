@@ -1,0 +1,426 @@
+{
+  "id": "dotnet-core",
+  "name": ".NET (ASP.NET Core Web API)",
+  "aliases": [
+    "dotnet",
+    "dotnet-bootstrap-mssql"
+  ],
+  "defaultPort": 5000,
+  "databases": [
+    "mssql",
+    "mysql"
+  ],
+  "stylings": [
+    "tailwind",
+    "bootstrap",
+    "vanilla"
+  ],
+  "options": [
+    {
+      "id": "template",
+      "label": "Project type",
+      "default": "mvc",
+      "choices": [
+        {
+          "value": "mvc",
+          "label": "MVC (Model · View · Controller)",
+          "hint": "server-rendered pages · Razor views"
+        },
+        {
+          "value": "api",
+          "label": "Web API",
+          "hint": "JSON endpoints · Swagger · for SPA / mobile"
+        }
+      ]
+    }
+  ],
+  "nextSteps": [
+    "dotnet run --urls http://localhost:{{PORT}}"
+  ],
+  "versions": {
+    "source": "dotnet",
+    "minMajor": 8,
+    "testedUpTo": 10,
+    "lts": [
+      8,
+      10
+    ],
+    "offline": [
+      10,
+      9,
+      8
+    ]
+  },
+  "requires": [
+    {
+      "cmd": "dotnet",
+      "args": [
+        "--list-sdks"
+      ],
+      "name": ".NET SDK",
+      "install": "https://dotnet.microsoft.com/download",
+      "minMajor": {
+        "pattern": "^(\\d+)\\."
+      }
+    }
+  ],
+  "vars": [
+    {
+      "name": "SWASHBUCKLE_VERSION",
+      "when": {
+        "version": "<10"
+      },
+      "value": "9.*"
+    },
+    {
+      "name": "SWASHBUCKLE_VERSION",
+      "when": {
+        "version": ">=10"
+      },
+      "value": "10.*"
+    },
+    {
+      "name": "DB_USE",
+      "when": {
+        "database": "mssql"
+      },
+      "value": "options.UseSqlServer(connectionString)"
+    },
+    {
+      "name": "DB_USE",
+      "when": {
+        "database": "mysql"
+      },
+      "value": "options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))"
+    },
+    {
+      "name": "CONNECTION_STRING",
+      "when": {
+        "database": "mssql"
+      },
+      "value": "Server=localhost,1433;Database={{DB_NAME}};User Id=sa;Password=change-me;TrustServerCertificate=True;"
+    },
+    {
+      "name": "CONNECTION_STRING",
+      "when": {
+        "database": "mysql"
+      },
+      "value": "Server=localhost;Port=3306;Database={{DB_NAME}};Uid=root;Pwd=;"
+    },
+    {
+      "name": "AUTH_USINGS",
+      "when": {
+        "auth": true,
+        "template": "api"
+      },
+      "value": "using System.Text;\nusing Microsoft.AspNetCore.Authentication.JwtBearer;\nusing Microsoft.IdentityModel.Tokens;"
+    },
+    {
+      "name": "AUTH_SERVICES",
+      "when": {
+        "auth": true,
+        "template": "api"
+      },
+      "value": "var jwtKey = builder.Configuration[\"Jwt:Key\"] ?? throw new InvalidOperationException(\"Jwt:Key is not configured\");\nbuilder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddJwtBearer(options =>\n    {\n        options.TokenValidationParameters = new TokenValidationParameters\n        {\n            ValidateIssuer = false,\n            ValidateAudience = false,\n            ValidateIssuerSigningKey = true,\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))\n        };\n    });"
+    },
+    {
+      "name": "AUTH_MIDDLEWARE",
+      "when": {
+        "auth": true,
+        "template": "api"
+      },
+      "value": "app.UseAuthentication();"
+    },
+    {
+      "name": "DBCONTEXT_EXTRA",
+      "when": {
+        "auth": true,
+        "template": "mvc"
+      },
+      "value": "public DbSet<AppUser> Users { get; set; }"
+    },
+    {
+      "name": "PRODUCTS_AUTHORIZE",
+      "when": {
+        "auth": true,
+        "template": "mvc"
+      },
+      "value": "[Microsoft.AspNetCore.Authorization.Authorize]"
+    },
+    {
+      "name": "MVC_USINGS",
+      "when": {
+        "template": "mvc"
+      },
+      "value": "using Microsoft.EntityFrameworkCore;\nusing {{NAMESPACE}}.Data;\n"
+    },
+    {
+      "name": "MVC_AUTH_USINGS",
+      "when": {
+        "auth": true,
+        "template": "mvc"
+      },
+      "value": "using Microsoft.AspNetCore.Authentication.Cookies;\n"
+    },
+    {
+      "name": "MVC_AUTH_SERVICES",
+      "when": {
+        "auth": true,
+        "template": "mvc"
+      },
+      "value": "\nbuilder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)\n    .AddCookie(options =>\n    {\n        options.LoginPath = \"/Account/Login\";\n        options.LogoutPath = \"/Account/Logout\";\n    });"
+    }
+  ],
+  "steps": [
+    {
+      "label": "Running official dotnet new webapi (net{{VERSION}}.0)",
+      "cwd": "parent",
+      "run": [
+        "dotnet",
+        "new",
+        "webapi",
+        "-n",
+        "{{PROJECT_NAME}}",
+        "-o",
+        "{{PROJECT_NAME}}",
+        "--framework",
+        "net{{VERSION}}.0"
+      ],
+      "when": {
+        "template": "api"
+      }
+    },
+    {
+      "label": "Running official dotnet new mvc (net{{VERSION}}.0)",
+      "when": {
+        "template": "mvc"
+      },
+      "cwd": "parent",
+      "run": [
+        "dotnet",
+        "new",
+        "mvc",
+        "-n",
+        "{{PROJECT_NAME}}",
+        "-o",
+        "{{PROJECT_NAME}}",
+        "--framework",
+        "net{{VERSION}}.0"
+      ]
+    },
+    {
+      "label": "Creating Visual Studio solution",
+      "run": [
+        "dotnet",
+        "new",
+        "sln",
+        "-n",
+        "{{PROJECT_NAME}}"
+      ]
+    },
+    {
+      "run": [
+        "dotnet",
+        "sln",
+        "add",
+        "{{PROJECT_NAME}}.csproj"
+      ]
+    },
+    {
+      "label": "Adding NuGet packages for .NET {{VERSION}}",
+      "insertBefore": "{{PROJECT_NAME}}.csproj",
+      "marker": "</Project>",
+      "from": "snippets/packages-ef.xml"
+    },
+    {
+      "insertBefore": "{{PROJECT_NAME}}.csproj",
+      "marker": "</Project>",
+      "from": "snippets/packages-swagger.xml",
+      "when": {
+        "template": "api"
+      }
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "insertBefore": "{{PROJECT_NAME}}.csproj",
+      "marker": "</Project>",
+      "from": "snippets/packages-mssql.xml"
+    },
+    {
+      "when": {
+        "database": "mysql"
+      },
+      "insertBefore": "{{PROJECT_NAME}}.csproj",
+      "marker": "</Project>",
+      "from": "snippets/packages-mysql.xml"
+    },
+    {
+      "when": {
+        "auth": true,
+        "template": "api"
+      },
+      "insertBefore": "{{PROJECT_NAME}}.csproj",
+      "marker": "</Project>",
+      "from": "snippets/packages-auth.xml"
+    },
+    {
+      "label": "Applying BoilerCraft overlay",
+      "copy": "overlays/common"
+    },
+    {
+      "when": {
+        "template": "api"
+      },
+      "copy": "overlays/api"
+    },
+    {
+      "when": {
+        "auth": true,
+        "template": "api"
+      },
+      "copy": "overlays/api-auth"
+    },
+    {
+      "write": "wwwroot/theme.css",
+      "content": "{{THEME_CSS}}",
+      "when": {
+        "template": "api"
+      }
+    },
+    {
+      "write": "wwwroot/theme.js",
+      "content": "{{THEME_JS}}",
+      "when": {
+        "template": "api"
+      }
+    },
+    {
+      "json": "appsettings.json",
+      "merge": {
+        "ConnectionStrings": {
+          "DefaultConnection": "{{CONNECTION_STRING}}"
+        }
+      }
+    },
+    {
+      "when": {
+        "auth": true,
+        "template": "api"
+      },
+      "json": "appsettings.Development.json",
+      "merge": {
+        "Jwt": {
+          "Key": "{{RANDOM_SECRET}}"
+        }
+      }
+    },
+    {
+      "label": "Wiring MVC: database, views and navigation",
+      "when": {
+        "template": "mvc"
+      },
+      "copy": "overlays/mvc"
+    },
+    {
+      "when": {
+        "auth": true,
+        "template": "mvc"
+      },
+      "copy": "overlays/mvc-auth"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "write": "wwwroot/css/boilercraft-theme.css",
+      "content": "{{THEME_CSS}}"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "write": "wwwroot/js/boilercraft-theme.js",
+      "content": "{{THEME_JS}}"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "prepend": "Program.cs",
+      "content": "{{MVC_USINGS}}{{MVC_AUTH_USINGS}}\n"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "replace": "Program.cs",
+      "skipIfContains": "ApplicationDbContext",
+      "find": "builder.Services.AddControllersWithViews();",
+      "with": "$&\n\n// Database: {{DATABASE}} (Entity Framework Core)\nvar connectionString = builder.Configuration.GetConnectionString(\"DefaultConnection\")\n    ?? throw new InvalidOperationException(\"ConnectionStrings:DefaultConnection is not configured\");\nbuilder.Services.AddDbContext<ApplicationDbContext>(options => {{DB_USE}});{{MVC_AUTH_SERVICES}}"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "replace": "Program.cs",
+      "skipIfContains": "EnsureCreated",
+      "find": "var app = builder.Build();",
+      "with": "$&\n\n// Development convenience: create the database/tables if they do not exist yet.\n// For production, switch to EF Core migrations (dotnet ef migrations add Initial).\nif (app.Environment.IsDevelopment())\n{\n    using var scope = app.Services.CreateScope();\n    try\n    {\n        scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.EnsureCreated();\n    }\n    catch (Exception ex)\n    {\n        app.Logger.LogWarning(\"Could not reach the database ({Message}). Check ConnectionStrings:DefaultConnection.\", ex.Message);\n    }\n}"
+    },
+    {
+      "when": {
+        "auth": true,
+        "template": "mvc"
+      },
+      "replace": "Program.cs",
+      "skipIfContains": "app.UseAuthentication();",
+      "find": "app.UseAuthorization();",
+      "with": "app.UseAuthentication();\n$&"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "replace": "Views/Shared/_Layout.cshtml",
+      "find": "<html lang=\"en\">",
+      "with": "<html lang=\"en\" data-theme=\"{{COLOR_MODE}}\">"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "insertBefore": "Views/Shared/_Layout.cshtml",
+      "marker": "</head>",
+      "content": "    <link rel=\"stylesheet\" href=\"~/css/boilercraft-theme.css\" asp-append-version=\"true\" />\n"
+    },
+    {
+      "when": {
+        "template": "mvc"
+      },
+      "replace": "Views/Shared/_Layout.cshtml",
+      "skipIfContains": "asp-controller=\"Products\"",
+      "findRegex": "asp-action=\"Privacy\">Privacy</a>\\s*</li>",
+      "with": "$&\n                        <li class=\"nav-item\">\n                            <a class=\"nav-link text-dark\" asp-area=\"\" asp-controller=\"Products\" asp-action=\"Index\">Products</a>\n                        </li>"
+    },
+    {
+      "when": {
+        "auth": true,
+        "template": "mvc"
+      },
+      "replace": "Views/Shared/_Layout.cshtml",
+      "skipIfContains": "_AuthNav",
+      "find": "</ul>",
+      "with": "$&\n                    <partial name=\"_AuthNav\" />"
+    },
+    {
+      "label": "Restoring packages",
+      "optional": true,
+      "run": [
+        "dotnet",
+        "restore"
+      ]
+    }
+  ]
+}

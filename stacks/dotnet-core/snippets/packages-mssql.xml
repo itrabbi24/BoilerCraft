@@ -1,0 +1,4 @@
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="{{VERSION}}.0.*" />
+  </ItemGroup>
+

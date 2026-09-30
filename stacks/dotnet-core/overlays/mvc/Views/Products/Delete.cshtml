@@ -1,0 +1,16 @@
+@model Product
+@{
+    ViewData["Title"] = "Delete product";
+}
+
+<h1 class="h3 mb-4">Delete product</h1>
+
+<div class="alert alert-warning" style="max-width: 560px;">
+    Delete <strong>@Model.Name</strong> (@Model.Price.ToString("0.00"))? This cannot be undone.
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-link">Cancel</a>
+</form>

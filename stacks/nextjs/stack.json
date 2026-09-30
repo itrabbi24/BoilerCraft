@@ -1,0 +1,257 @@
+{
+  "id": "nextjs",
+  "name": "Next.js",
+  "defaultPort": 3000,
+  "databases": [
+    "mongodb",
+    "mysql",
+    "mssql"
+  ],
+  "stylings": [
+    "tailwind",
+    "bootstrap",
+    "vanilla"
+  ],
+  "options": [
+    {
+      "id": "router",
+      "label": "Router",
+      "default": "app",
+      "choices": [
+        {
+          "value": "app",
+          "label": "App Router",
+          "hint": "recommended · Server Components · layouts"
+        },
+        {
+          "value": "pages",
+          "label": "Pages Router",
+          "hint": "classic · getServerSideProps · API routes"
+        }
+      ]
+    }
+  ],
+  "nextSteps": [
+    "npm run dev"
+  ],
+  "versions": {
+    "source": "npm",
+    "package": "next",
+    "minMajor": 14,
+    "testedUpTo": 16,
+    "offline": [
+      16,
+      15,
+      14
+    ]
+  },
+  "requires": [
+    {
+      "cmd": "node",
+      "name": "Node.js",
+      "install": "https://nodejs.org"
+    },
+    {
+      "cmd": "npx",
+      "name": "npx",
+      "install": "Ships with Node.js"
+    }
+  ],
+  "steps": [
+    {
+      "label": "Running official create-next-app@{{VERSION}}",
+      "cwd": "parent",
+      "run": [
+        "npx",
+        "--yes",
+        "create-next-app@{{VERSION}}",
+        "{{PROJECT_NAME}}",
+        "--js",
+        "{{NEXT_ROUTER_FLAG}}",
+        "--src-dir",
+        "--eslint",
+        "--use-npm",
+        "--import-alias",
+        "@/*",
+        "{{NEXT_TAILWIND_FLAG}}"
+      ]
+    },
+    {
+      "when": {
+        "database": "mongodb"
+      },
+      "run": [
+        "npm",
+        "install",
+        "mongoose"
+      ]
+    },
+    {
+      "when": {
+        "database": "mysql"
+      },
+      "run": [
+        "npm",
+        "install",
+        "mysql2"
+      ]
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "run": [
+        "npm",
+        "install",
+        "mssql"
+      ]
+    },
+    {
+      "when": {
+        "styling": "bootstrap"
+      },
+      "run": [
+        "npm",
+        "install",
+        "bootstrap"
+      ]
+    },
+    {
+      "when": {
+        "auth": true
+      },
+      "run": [
+        "npm",
+        "install",
+        "jsonwebtoken",
+        "bcryptjs"
+      ]
+    },
+    {
+      "json": "package.json",
+      "merge": {
+        "scripts": {
+          "dev": "next dev -p {{PORT}}",
+          "start": "next start -p {{PORT}}"
+        }
+      }
+    },
+    {
+      "label": "Applying BoilerCraft overlay",
+      "copy": "overlays/common"
+    },
+    {
+      "when": {
+        "router": "app"
+      },
+      "copy": "overlays/router-app"
+    },
+    {
+      "when": {
+        "router": "pages"
+      },
+      "copy": "overlays/router-pages"
+    },
+    {
+      "when": {
+        "database": "mongodb"
+      },
+      "copy": "overlays/db/mongodb"
+    },
+    {
+      "when": {
+        "database": "mysql"
+      },
+      "copy": "overlays/db/mysql"
+    },
+    {
+      "when": {
+        "database": "mssql"
+      },
+      "copy": "overlays/db/mssql"
+    },
+    {
+      "when": {
+        "auth": true
+      },
+      "copy": "overlays/auth"
+    },
+    {
+      "when": {
+        "auth": true,
+        "router": "app"
+      },
+      "copy": "overlays/auth-app"
+    },
+    {
+      "when": {
+        "auth": true,
+        "router": "pages"
+      },
+      "copy": "overlays/auth-pages"
+    },
+    {
+      "when": {
+        "styling": "bootstrap",
+        "router": "app"
+      },
+      "write": "src/styles/vendor.js",
+      "content": "import 'bootstrap/dist/css/bootstrap.min.css';\n"
+    },
+    {
+      "when": {
+        "styling": [
+          "tailwind",
+          "vanilla"
+        ],
+        "router": "app"
+      },
+      "write": "src/styles/vendor.js",
+      "content": "// No vendor stylesheet for this styling option.\n"
+    },
+    {
+      "write": "src/styles/theme.css",
+      "content": "{{THEME_CSS}}"
+    }
+  ],
+  "vars": [
+    {
+      "name": "NEXT_ROUTER_FLAG",
+      "when": {
+        "router": "app"
+      },
+      "value": "--app"
+    },
+    {
+      "name": "NEXT_ROUTER_FLAG",
+      "when": {
+        "router": "pages"
+      },
+      "value": "--no-app"
+    },
+    {
+      "name": "NEXT_TAILWIND_FLAG",
+      "when": {
+        "styling": "tailwind"
+      },
+      "value": "--tailwind"
+    },
+    {
+      "name": "NEXT_TAILWIND_FLAG",
+      "when": {
+        "styling": [
+          "bootstrap",
+          "vanilla"
+        ]
+      },
+      "value": "--no-tailwind"
+    },
+    {
+      "name": "PAGES_VENDOR_CSS",
+      "when": {
+        "styling": "bootstrap"
+      },
+      "value": "import 'bootstrap/dist/css/bootstrap.min.css';"
+    }
+  ]
+}
