@@ -1,0 +1,28 @@
+{
+  "id": "go-gin",
+  "name": "Go + Gin",
+  "order": 9,
+  "description": "Fast compiled REST API · single binary",
+  "runtime": "go",
+  "extras": ["docker", "ci"],
+  "auth": false,
+  "defaultPort": 8080,
+  "databases": ["none"],
+  "stylings": ["tailwind", "bootstrap", "vanilla"],
+  "nextSteps": ["go run ."],
+  "versions": { "source": "goproxy", "package": "github.com/gin-gonic/gin", "minMajor": 1, "testedUpTo": 1, "offline": [1] },
+  "requires": [
+    { "cmd": "go", "args": ["version"], "name": "Go", "install": "https://go.dev/dl" }
+  ],
+  "steps": [
+    { "label": "Running official go mod init", "run": ["go", "mod", "init", "{{PROJECT_NAME}}"] },
+    { "label": "Applying BoilerCraft overlay", "copy": "overlays/common" },
+    { "write": "public/theme.css", "content": "{{THEME_CSS}}" },
+    { "write": "public/theme.js", "content": "{{THEME_JS}}" },
+    { "label": "Installing Gin v{{VERSION}}", "run": ["go", "get", "github.com/gin-gonic/gin@latest", "github.com/joho/godotenv@latest"] },
+    { "run": ["go", "mod", "tidy"] },
+    { "write": ".env", "content": "PORT={{PORT}}\nGIN_MODE=debug\n" },
+    { "write": ".env.example", "content": "PORT={{PORT}}\nGIN_MODE=debug\n" },
+    { "write": ".gitignore", "content": ".env\n/{{PROJECT_NAME}}\n*.exe\n" }
+  ]
+}

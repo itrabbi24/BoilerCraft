@@ -44,6 +44,7 @@ class Database {
 
                     case 'pgsql':
                     case 'postgres':
+                    case 'postgresql':
                         $port = getenv('DB_PORT') ?: '5432';
                         $dsn = "pgsql:host={$host};port={$port};dbname={$dbname}";
                         self::$instance = new PDO($dsn, $user, $pass, $commonOptions);

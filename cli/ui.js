@@ -260,6 +260,72 @@ async function selectPlain(question, options, initial) {
   throw new CancelError();
 }
 
+/**
+ * Checkbox list. options: [{ value, label, hint, checked }]
+ * Space toggles, "a" toggles all, Enter confirms. Returns the chosen values.
+ */
+async function multiSelect(question, options) {
+  const picked = new Set(options.filter(o => o.checked).map(o => o.value));
+  if (!isTTY) {
+    console.log(`  ${c.cyan('?')} ${c.bold(question)}`);
+    options.forEach((o, i) => console.log(`    ${String(i + 1).padStart(2)}) ${o.label}${o.hint ? c.gray(`  ${o.hint}`) : ''}`));
+    process.stdout.write(`    ${c.gray('numbers, comma separated (blank = none):')} `);
+    const answer = await nextLine();
+    if (answer === null) throw new CancelError();
+    process.stdout.write(`${answer}\n`);
+    return answer.split(',').map(n => options[parseInt(n, 10) - 1]).filter(Boolean).map(o => o.value);
+  }
+
+  let index = 0;
+  return new Promise((resolve, reject) => {
+    const out = process.stdout;
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    out.write('\x1b[?25l');
+    out.write(truncate(`  ${c.cyan('?')} ${c.bold(question)} ${c.gray('· space to toggle, enter to confirm')}`, columns() - 1) + '\n');
+    const render = first => {
+      if (!first) out.write(`\x1b[${options.length}A`);
+      options.forEach((o, i) => {
+        const mark = picked.has(o.value) ? c.green('◉') : c.gray('◯');
+        const label = i === index ? c.cyan(c.bold(o.label)) : o.label;
+        const full = `    ${i === index ? c.cyan('❯') : ' '} ${mark} ${label}${o.hint ? `  ${c.gray(o.hint)}` : ''}`;
+        out.write(`\x1b[2K${width(full) <= columns() - 1 ? full : truncate(full, columns() - 1)}\n`);
+      });
+    };
+    render(true);
+    const finish = () => {
+      process.stdin.removeListener('keypress', onKey);
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      out.write(`\x1b[${options.length + 1}A\x1b[0J\x1b[?25h`);
+    };
+    const onKey = (str, key = {}) => {
+      if ((key.ctrl && key.name === 'c') || key.name === 'escape') {
+        finish();
+        return reject(new CancelError());
+      }
+      if (key.name === 'up' || key.name === 'k') index = (index - 1 + options.length) % options.length;
+      else if (key.name === 'down' || key.name === 'j' || key.name === 'tab') index = (index + 1) % options.length;
+      else if (key.name === 'space') {
+        const v = options[index].value;
+        if (picked.has(v)) picked.delete(v);
+        else picked.add(v);
+      } else if (str === 'a') {
+        if (picked.size === options.length) picked.clear();
+        else options.forEach(o => picked.add(o.value));
+      } else if (key.name === 'return' || key.name === 'enter') {
+        finish();
+        const chosen = options.filter(o => picked.has(o.value));
+        out.write(`  ${c.green('✔')} ${c.bold(question)} ${c.gray('·')} ${c.cyan(chosen.length ? chosen.map(o => o.short || stripAnsi(o.label)).join(', ') : 'None')}\n`);
+        return resolve(chosen.map(o => o.value));
+      }
+      render(false);
+    };
+    process.stdin.on('keypress', onKey);
+  });
+}
+
 async function confirm(question, initial = true) {
   return select(question, [
     { value: true, label: 'Yes', short: 'Yes' },
@@ -353,4 +419,4 @@ const log = {
   info: msg => console.log(`  ${c.blue('ℹ')} ${msg}`)
 };
 
-module.exports = { truncate, c, isTTY, swatch, gradient, banner, box, divider, input, select, confirm, spinner, tasks, log, width, stripAnsi, CancelError };
+module.exports = { truncate, c, isTTY, swatch, gradient, banner, box, divider, input, select, multiSelect, confirm, spinner, tasks, log, width, stripAnsi, CancelError };

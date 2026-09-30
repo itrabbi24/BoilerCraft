@@ -1,6 +1,18 @@
 {
   "id": "laravel",
   "name": "Laravel",
+  "order": 1,
+  "runtime": "php",
+  "extras": [
+    "docker",
+    "ci"
+  ],
+  "docker": {
+    "start": "php artisan serve --host=0.0.0.0 --port=8000"
+  },
+  "ci": {
+    "test": "cp .env.example .env && php artisan key:generate && php artisan test"
+  },
   "aliases": [
     "laravel-vue-mysql"
   ],

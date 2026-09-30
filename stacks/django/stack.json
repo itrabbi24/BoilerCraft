@@ -1,0 +1,42 @@
+{
+  "id": "django",
+  "name": "Django",
+  "order": 7,
+  "description": "Python · batteries included · admin + auth built in",
+  "runtime": "python",
+  "extras": ["docker", "ci"],
+  "docker": { "start": "python manage.py runserver 0.0.0.0:8000" },
+  "ci": { "test": "python manage.py check && python manage.py test" },
+  "auth": false,
+  "defaultPort": 8000,
+  "databases": ["sqlite", "postgresql"],
+  "stylings": ["tailwind", "bootstrap", "vanilla"],
+  "nextSteps": ["{{VENV_PY}} manage.py migrate", "{{VENV_PY}} manage.py runserver {{PORT}}"],
+  "versions": { "source": "pypi", "package": "django", "minMajor": 4, "testedUpTo": 6, "offline": [6, 5, 4] },
+  "requires": [
+    { "cmd": "python", "name": "Python 3", "install": "https://www.python.org/downloads", "platform": "win32" },
+    { "cmd": "python3", "name": "Python 3", "install": "https://www.python.org/downloads", "platform": ["darwin", "linux"] }
+  ],
+  "vars": [
+    { "name": "PY", "value": "python3" },
+    { "name": "PY", "when": { "platform": "win32" }, "value": "python" },
+    { "name": "VENV_PY", "value": ".venv/bin/python" },
+    { "name": "VENV_PY", "when": { "platform": "win32" }, "value": ".venv\\Scripts\\python" },
+    { "name": "PY_DB_DEPS", "value": "" },
+    { "name": "PY_DB_DEPS", "when": { "database": "postgresql" }, "value": "psycopg[binary]\n" }
+  ],
+  "steps": [
+    { "label": "Creating virtual environment (.venv)", "run": ["{{PY}}", "-m", "venv", ".venv"] },
+    { "write": "requirements.txt", "content": "Django~={{VERSION}}.0\npython-dotenv\n{{PY_DB_DEPS}}" },
+    { "label": "Installing Django {{VERSION}}.x", "run": ["{{VENV_PY}}", "-m", "pip", "install", "-q", "-r", "requirements.txt"] },
+    { "label": "Running official django-admin startproject", "run": ["{{VENV_PY}}", "-m", "django", "startproject", "config", "."] },
+    { "label": "Applying BoilerCraft overlay", "copy": "overlays/common" },
+    { "write": "static/theme.css", "content": "{{THEME_CSS}}" },
+    { "write": "static/theme.js", "content": "{{THEME_JS}}" },
+    { "append": "config/settings.py", "from": "snippets/settings.py" },
+    { "append": "config/urls.py", "content": "\nfrom django.views.generic import TemplateView\n\nurlpatterns += [path('', TemplateView.as_view(template_name='home.html'), name='home')]\n" },
+    { "write": ".env", "content": "DJANGO_SECRET_KEY={{RANDOM_SECRET}}\nDJANGO_DEBUG=1\nDB_ENGINE={{DB_TYPE}}\n{{DB_ENV}}\n" },
+    { "write": ".env.example", "content": "DJANGO_SECRET_KEY=change-me\nDJANGO_DEBUG=1\nDB_ENGINE={{DB_TYPE}}\n{{DB_ENV_EXAMPLE}}\n" },
+    { "write": ".gitignore", "content": ".venv/\n__pycache__/\n*.pyc\n.env\ndb.sqlite3\ndatabase.sqlite\nstaticfiles/\n" }
+  ]
+}

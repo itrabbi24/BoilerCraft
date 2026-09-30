@@ -1,6 +1,18 @@
 {
   "id": "nextjs",
   "name": "Next.js",
+  "order": 2,
+  "runtime": "node",
+  "extras": [
+    "docker",
+    "ci",
+    "lint",
+    "prisma"
+  ],
+  "docker": {
+    "build": "npm run build",
+    "start": "npm start"
+  },
   "defaultPort": 3000,
   "databases": [
     "mongodb",

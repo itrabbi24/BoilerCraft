@@ -1,0 +1,28 @@
+{
+  "id": "demo",
+  "name": "Demo",
+  "runtime": "node",
+  "extras": ["docker", "ci"],
+  "docker": { "start": "node src/index.js" },
+  "defaultPort": 4000,
+  "databases": ["mysql", "postgresql", "none"],
+  "stylings": ["vanilla"],
+  "options": [
+    { "id": "flavor", "label": "Flavor", "default": "plain", "choices": [{ "value": "plain", "label": "Plain" }, { "value": "fancy", "label": "Fancy" }] }
+  ],
+  "versions": { "source": "static", "minMajor": 1, "testedUpTo": 2, "offline": [3, 2, 1] },
+  "requires": [{ "cmd": "node", "name": "Node.js" }],
+  "vars": [
+    { "name": "GREETING", "value": "hello" },
+    { "name": "GREETING", "when": { "flavor": "fancy" }, "value": "good day" }
+  ],
+  "steps": [
+    { "copy": "overlays/common" },
+    { "write": "package.json", "content": "{ \"name\": \"{{PROJECT_NAME}}\" }" },
+    { "json": "package.json", "merge": { "scripts": { "start": "node src/index.js" }, "author": "{{AUTHOR}}" } },
+    { "when": { "version": ">=2" }, "write": "V2.txt", "content": "v{{VERSION}}" },
+    { "when": { "database": "postgresql" }, "write": ".env", "content": "{{DB_ENV}}" },
+    { "when": { "extra": "docker" }, "write": "EXTRA.txt", "content": "docker on" },
+    { "replace": "src/index.js", "find": "__GREETING__", "with": "{{GREETING}}" }
+  ]
+}

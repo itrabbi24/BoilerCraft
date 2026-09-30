@@ -1,6 +1,12 @@
 {
   "id": "dotnet-core",
   "name": ".NET (ASP.NET Core Web API)",
+  "order": 6,
+  "runtime": "dotnet",
+  "extras": [
+    "docker",
+    "ci"
+  ],
   "aliases": [
     "dotnet",
     "dotnet-bootstrap-mssql"

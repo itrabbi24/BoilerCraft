@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { listVersions, majorOf } = require('./versionCatalog');
 const { toolEnv } = require('./toolInstaller');
+const { applyExtras, supportedExtras } = require('./extras');
+const { initGit } = require('./postCreate');
 const { generateThemeCSS, getThemeSwitcherJS } = require('../themeGenerator');
 const { generateDynamicStackReadme } = require('../readmeGenerator');
 const {
@@ -31,7 +33,8 @@ const {
  * needs one more overlay folder + a `when: { version: ">=N" }` step.
  */
 
-const STACKS_DIR = path.join(__dirname, '..', '..', 'stacks');
+// BOILERCRAFT_STACKS_DIR lets tests point the engine at fixture stacks.
+const STACKS_DIR = process.env.BOILERCRAFT_STACKS_DIR || path.join(__dirname, '..', '..', 'stacks');
 
 class RequirementError extends Error {
   constructor(missing) {
@@ -52,7 +55,8 @@ function loadStacks() {
     .map(dir => {
       const manifest = JSON.parse(fs.readFileSync(path.join(STACKS_DIR, dir, 'stack.json'), 'utf8'));
       return { ...manifest, id: manifest.id || dir, dir: path.join(STACKS_DIR, dir) };
-    });
+    })
+    .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 }
 
 function getStack(id) {
@@ -96,6 +100,7 @@ function matches(when, ctx) {
   if (when.auth !== undefined && when.auth !== ctx.auth) return false;
   if (when.roles !== undefined && when.roles !== ctx.roles) return false;
   if (when.platform !== undefined && !oneOf(when.platform, process.platform)) return false;
+  if (when.extra !== undefined && !(ctx.extras || []).includes(when.extra)) return false;
   // Any other key refers to a stack-specific option (e.g. Next.js "router").
   for (const [key, expected] of Object.entries(when)) {
     if (BUILTIN_WHEN_KEYS.has(key)) continue;
@@ -104,7 +109,7 @@ function matches(when, ctx) {
   return true;
 }
 
-const BUILTIN_WHEN_KEYS = new Set(['version', 'database', 'styling', 'auth', 'roles', 'platform']);
+const BUILTIN_WHEN_KEYS = new Set(['version', 'database', 'styling', 'auth', 'roles', 'platform', 'extra']);
 
 // Stack-specific options (manifest "options"), validated, with defaults filled in.
 function resolveOptions(stack, given = {}) {
@@ -190,7 +195,9 @@ function buildVars(config, stack, ctx) {
   const dbEnv = password => ({
     mongodb: `MONGODB_URI=mongodb://127.0.0.1:27017/${vars.DB_NAME}`,
     mysql: `DB_HOST=127.0.0.1\nDB_PORT=3306\nDB_DATABASE=${vars.DB_NAME}\nDB_USERNAME=root\nDB_PASSWORD=`,
-    mssql: `DB_HOST=127.0.0.1\nDB_PORT=1433\nDB_DATABASE=${vars.DB_NAME}\nDB_USERNAME=sa\nDB_PASSWORD=${password}`
+    mssql: `DB_HOST=127.0.0.1\nDB_PORT=1433\nDB_DATABASE=${vars.DB_NAME}\nDB_USERNAME=sa\nDB_PASSWORD=${password}`,
+    postgresql: `DB_HOST=127.0.0.1\nDB_PORT=5432\nDB_DATABASE=${vars.DB_NAME}\nDB_USERNAME=postgres\nDB_PASSWORD=${password}`,
+    sqlite: 'DB_PATH=database.sqlite'
   }[ctx.database] || '');
   // Stack options are available as {{OPTION_<ID>}}, e.g. {{OPTION_FRONTEND}}.
   for (const [id, value] of Object.entries(ctx.options || {})) vars[`OPTION_${id.toUpperCase()}`] = String(value);
@@ -253,7 +260,8 @@ function runCommand(cmd, args, cwd, log, extraEnv = {}) {
     const child = spawn(line, {
       cwd,
       shell: true,
-      env: { ...toolEnv(), CI: '1', COMPOSER_NO_INTERACTION: '1', DOTNET_CLI_TELEMETRY_OPTOUT: '1', DOTNET_NOLOGO: '1', ...extraEnv }
+      stdio: ['ignore', 'pipe', 'pipe'], // no stdin: a tool that prompts gets EOF instead of hanging
+      env: { ...toolEnv(), CI: '1', COMPOSER_NO_INTERACTION: '1', DOTNET_CLI_TELEMETRY_OPTOUT: '1', DOTNET_NOLOGO: '1', CHECKPOINT_DISABLE: '1', ...extraEnv }
     });
     let tail = '';
     const onData = chunk => {
@@ -272,8 +280,12 @@ function runCommand(cmd, args, cwd, log, extraEnv = {}) {
 }
 
 function captureCommand(cmd, args) {
+  return captureIn(cmd, args);
+}
+
+function captureIn(cmd, args, cwd) {
   return new Promise(resolve => {
-    const child = spawn([cmd, ...args].map(quoteArg).join(' '), { shell: true, env: toolEnv() });
+    const child = spawn([cmd, ...args].map(quoteArg).join(' '), { shell: true, cwd, env: toolEnv() });
     let out = '';
     child.stdout.on('data', c => (out += c));
     child.stderr.on('data', c => (out += c));
@@ -325,6 +337,7 @@ async function executeStep(step, ctx) {
     copyDir(path.join(stack.dir, step.copy), step.to ? resolvePath(step.to) : projectDir, vars, log);
   } else if (step.write) {
     const file = resolvePath(step.write);
+    if (step.ifMissing && fs.existsSync(file)) return;
     ensureDir(path.dirname(file));
     fs.writeFileSync(file, interpolate(readSource(step), vars));
   } else if (step.prepend) {
@@ -334,6 +347,7 @@ async function executeStep(step, ctx) {
   } else if (step.append) {
     const file = resolvePath(step.append);
     if (!fs.existsSync(file)) return warn(`append: ${step.append} not found, skipped`);
+    if (step.skipIfContains && fs.readFileSync(file, 'utf8').includes(step.skipIfContains)) return;
     fs.appendFileSync(file, interpolate(readSource(step), vars));
   } else if (step.replace) {
     const file = resolvePath(step.replace);
@@ -376,6 +390,7 @@ async function executeStep(step, ctx) {
 async function checkRequirements(stack, major) {
   const missing = [];
   for (const req of stack.requires || []) {
+    if (req.platform && !oneOf(req.platform, process.platform)) continue;
     const { ok, out } = await captureCommand(req.cmd, req.args || ['--version']);
     if (!ok) {
       missing.push({ tool: req.tool || req.cmd, name: req.name || req.cmd, install: req.install, major });
@@ -413,6 +428,10 @@ async function describeStacks() {
       databases: stack.databases,
       options: stack.options || [],
       stylings: stack.stylings,
+      extras: supportedExtras(stack),
+      auth: stack.auth !== false,
+      description: stack.description || '',
+      nextSteps: stack.nextSteps || [],
       versions,
       requirements: { ok: missing.length === 0, missing }
     };
@@ -467,9 +486,10 @@ async function scaffold(config, outputBasePath = null, onLog = () => {}) {
     major,
     database,
     styling,
-    auth: config.auth ? config.auth.enabled !== false : true,
+    auth: stack.auth === false ? false : config.auth ? config.auth.enabled !== false : true,
     roles: !!config.auth?.roles,
     options: resolveOptions(stack, config.options),
+    extras: (config.extras || []).filter(x => supportedExtras(stack).includes(x)),
     parentDir,
     projectDir,
     log,
@@ -491,6 +511,9 @@ async function scaffold(config, outputBasePath = null, onLog = () => {}) {
     );
   }
 
+  await applyExtras(ctx, { runCommand, interpolate });
+  if (config.git !== false) await initGit(ctx, captureIn);
+
   log('Done.');
   return {
     success: true,
@@ -498,7 +521,7 @@ async function scaffold(config, outputBasePath = null, onLog = () => {}) {
     projectName: name,
     path: projectDir,
     version: major,
-    combination: [`${stack.id}@${major}`, ...Object.values(ctx.options), database, styling].join(' + '),
+    combination: [`${stack.id}@${major}`, ...Object.values(ctx.options), database, styling, ...ctx.extras].join(' + '),
     nextSteps: (stack.nextSteps || []).map(s => interpolate(s, ctx.vars)),
     warnings,
     logs
@@ -513,5 +536,8 @@ module.exports = {
   loadStacks,
   parseMajor,
   versionMatches,
+  matches,
+  interpolate,
+  resolveOptions,
   RequirementError
 };

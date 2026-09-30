@@ -21,8 +21,8 @@ async function runLegacy(config, warning) {
 }
 
 /**
- * Stacks with a manifest in stacks/ are scaffolded by the official-CLI engine.
- * Everything else (e.g. raw-php) still uses the template generator. If the
+ * Every stack has a manifest in stacks/ and is scaffolded by the engine;
+ * the template generator is only an offline fallback. If the
  * required toolchain is missing, fall back to templates unless the caller
  * opted out with allowLegacyFallback: false.
  */

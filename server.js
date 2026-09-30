@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { generateProject } = require('./services/projectGenerator');
+// Every stack now goes through services/generate.js (manifest engine, with the
+// template generator only as an offline fallback), so this direct import is unused.
+// const { generateProject } = require('./services/projectGenerator');
 const { getLatestNpmVersion, getLatestPackagistVersion } = require('./services/versionResolver');
 const { describeStacks, RequirementError } = require('./services/engine/scaffoldEngine');
 // generate() (engine + legacy fallback) lives in services/generate.js, shared with the CLI.

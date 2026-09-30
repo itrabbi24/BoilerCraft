@@ -25,6 +25,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci --omit=dev
+      - run: npm test
       - run: node bin/boilercraft.js --help
       - run: node bin/boilercraft.js new ci-app -s node-express -d mongodb -y -o ${{ runner.temp }}
       - run: node bin/boilercraft.js list
@@ -39,6 +40,7 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
       - run: npm ci --omit=dev
+      - run: npm test
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

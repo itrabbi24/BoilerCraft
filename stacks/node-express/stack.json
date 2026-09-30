@@ -1,6 +1,17 @@
 {
   "id": "node-express",
   "name": "Node.js + Express",
+  "order": 4,
+  "runtime": "node",
+  "extras": [
+    "docker",
+    "ci",
+    "lint",
+    "prisma"
+  ],
+  "docker": {
+    "start": "npm start"
+  },
   "defaultPort": 5000,
   "databases": [
     "mysql",

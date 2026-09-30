@@ -1,0 +1,61 @@
+{
+  "id": "vite",
+  "name": "Vite (React · Vue · Svelte)",
+  "order": 5,
+  "description": "Frontend SPA on the official create-vite templates",
+  "runtime": "node",
+  "extras": ["docker", "ci", "lint"],
+  "docker": { "build": "npm run build", "start": "npx vite preview --host 0.0.0.0 --port 4173" },
+  "auth": false,
+  "defaultPort": 4173,
+  "databases": ["none"],
+  "stylings": ["vanilla"],
+  "options": [
+    {
+      "id": "framework",
+      "label": "UI library",
+      "default": "react",
+      "choices": [
+        { "value": "react", "label": "React", "hint": "most popular" },
+        { "value": "vue", "label": "Vue", "hint": "progressive, SFCs" },
+        { "value": "svelte", "label": "Svelte", "hint": "compiler, no virtual DOM" }
+      ]
+    },
+    {
+      "id": "language",
+      "label": "Language",
+      "default": "ts",
+      "choices": [
+        { "value": "ts", "label": "TypeScript", "hint": "recommended" },
+        { "value": "js", "label": "JavaScript" }
+      ]
+    }
+  ],
+  "nextSteps": ["npm run dev"],
+  "versions": { "source": "npm", "package": "create-vite", "minMajor": 6, "testedUpTo": 9, "offline": [9, 8, 7] },
+  "requires": [
+    { "cmd": "node", "name": "Node.js", "install": "https://nodejs.org" },
+    { "cmd": "npm", "name": "npm", "install": "Ships with Node.js" }
+  ],
+  "vars": [
+    { "name": "VITE_TEMPLATE", "value": "{{OPTION_FRAMEWORK}}" },
+    { "name": "VITE_TEMPLATE", "when": { "language": "ts" }, "value": "{{OPTION_FRAMEWORK}}-ts" }
+  ],
+  "steps": [
+    {
+      "label": "Running official create-vite@{{VERSION}} ({{VITE_TEMPLATE}})",
+      "cwd": "parent",
+      "run": ["npm", "create", "--yes", "vite@{{VERSION}}", "{{PROJECT_NAME}}", "--", "--template", "{{VITE_TEMPLATE}}", "--no-interactive"]
+    },
+    { "label": "Installing dependencies", "run": ["npm", "install"] },
+    { "json": "package.json", "merge": { "description": "{{APP_DESC}}", "author": "{{AUTHOR}}" } },
+    { "write": "public/theme.css", "content": "{{THEME_CSS}}" },
+    { "write": "public/theme.js", "content": "{{THEME_JS}}" },
+    {
+      "replace": "index.html",
+      "find": "</head>",
+      "with": "    <link rel=\"stylesheet\" href=\"/theme.css\" />\n    <script src=\"/theme.js\" defer></script>\n  </head>"
+    },
+    { "replace": "index.html", "findRegex": "<title>.*</title>", "with": "<title>{{APP_TITLE}}</title>" }
+  ]
+}

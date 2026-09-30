@@ -1,0 +1,46 @@
+{
+  "id": "nestjs",
+  "name": "NestJS",
+  "order": 3,
+  "description": "TypeScript API · modules · dependency injection",
+  "runtime": "node",
+  "extras": ["docker", "ci", "lint", "prisma"],
+  "docker": { "build": "npm run build", "start": "node dist/main" },
+  "ci": { "test": "npm test" },
+  "auth": false,
+  "defaultPort": 3000,
+  "databases": ["postgresql", "mysql", "mongodb", "sqlite"],
+  "stylings": ["vanilla"],
+  "nextSteps": ["npm run start:dev"],
+  "versions": { "source": "npm", "package": "@nestjs/core", "minMajor": 10, "testedUpTo": 12, "offline": [12, 11, 10] },
+  "requires": [
+    { "cmd": "node", "name": "Node.js", "install": "https://nodejs.org" },
+    { "cmd": "npx", "name": "npx", "install": "Ships with Node.js" }
+  ],
+  "steps": [
+    {
+      "label": "Running official @nestjs/cli@{{VERSION}} new",
+      "cwd": "parent",
+      "run": ["npx", "--yes", "@nestjs/cli@{{VERSION}}", "new", "{{PROJECT_NAME}}", "--package-manager", "npm", "--skip-git"]
+    },
+    { "label": "Installing config and database driver", "run": ["npm", "install", "@nestjs/config"] },
+    { "when": { "database": "postgresql" }, "run": ["npm", "install", "pg"] },
+    { "when": { "database": "mysql" }, "run": ["npm", "install", "mysql2"] },
+    { "when": { "database": "mongodb" }, "run": ["npm", "install", "mongoose", "@nestjs/mongoose"] },
+    { "json": "package.json", "merge": { "description": "{{APP_DESC}}", "author": "{{AUTHOR}}" } },
+    { "write": ".env", "content": "PORT={{PORT}}\n{{DB_ENV}}\n" },
+    { "write": ".env.example", "content": "PORT={{PORT}}\n{{DB_ENV_EXAMPLE}}\n" },
+    {
+      "replace": "src/app.module.ts",
+      "skipIfContains": "ConfigModule",
+      "find": "imports: [",
+      "with": "imports: [ConfigModule.forRoot({ isGlobal: true }), "
+    },
+    {
+      "prepend": "src/app.module.ts",
+      "content": "import { ConfigModule } from '@nestjs/config';\n"
+    },
+    { "write": ".gitignore", "ifMissing": true, "content": "node_modules/\ndist/\ncoverage/\n" },
+    { "append": ".gitignore", "skipIfContains": ".env", "content": "\n.env\n" }
+  ]
+}

@@ -7,6 +7,9 @@ const { describeStacks, checkRequirements, getStack } = require('../services/eng
 const { installMissing, canInstall, toolEnv, RECIPES, TOOLS_HOME } = require('../services/engine/toolInstaller');
 const { generate } = require('../services/generate');
 const { THEMES } = require('../services/themeGenerator');
+const { EXTRAS } = require('../services/engine/extras');
+const presets = require('../services/presets');
+const updateNotifier = require('../services/updateNotifier');
 const pkg = require('../package.json');
 
 const { c, log } = ui;
@@ -15,7 +18,9 @@ const AUTHOR = 'ARG RABBI';
 const REPO_URL = 'https://github.com/itrabbi24/BoilerCraft';
 const TAGLINE = 'Production-ready projects on the official tooling · any version · auth · themes';
 
-const LEGACY_STACKS = [{
+// raw-php now has a manifest in stacks/raw-php and runs through the engine.
+// Kept for reference in case a stack without a manifest is needed again.
+/* const LEGACY_STACKS = [{
   id: 'raw-php',
   name: 'Raw PHP (MVC)',
   databases: ['mysql'],
@@ -23,7 +28,7 @@ const LEGACY_STACKS = [{
   versions: [],
   requirements: { ok: true, missing: [] },
   nextSteps: ['php -S localhost:8000 -t public']
-}];
+}]; */
 
 const STACK_HINTS = {
   'laravel': 'Blade · Vue · React',
@@ -32,7 +37,8 @@ const STACK_HINTS = {
   'dotnet-core': 'MVC · Web API · EF Core',
   'raw-php': 'No framework · PDO'
 };
-const DB_LABELS = { mysql: 'MySQL', mssql: 'SQL Server', mongodb: 'MongoDB' };
+const stackHint = s => STACK_HINTS[s.id] || s.description || '';
+const DB_LABELS = { mysql: 'MySQL', mssql: 'SQL Server', mongodb: 'MongoDB', postgresql: 'PostgreSQL', sqlite: 'SQLite', none: 'None' };
 const STYLE_LABELS = { tailwind: 'Tailwind CSS', bootstrap: 'Bootstrap 5', vanilla: 'Plain CSS' };
 const COLOR_MODES = [
   { value: 'all', label: 'Dark + Light', hint: 'with a toggle' },
@@ -47,7 +53,7 @@ const COLOR_MODES = [
 let stacksPromise = null;
 function loadStacks({ refresh = false } = {}) {
   if (!stacksPromise || refresh) {
-    stacksPromise = describeStacks().then(list => [...list, ...LEGACY_STACKS]);
+    stacksPromise = describeStacks(); // was: .then(list => [...list, ...LEGACY_STACKS])
   }
   return stacksPromise;
 }
@@ -99,6 +105,12 @@ function isNewer(latest, current) {
 }
 
 async function checkForUpdate() {
+  return updateNotifier.checkForUpdate(pkg);
+}
+
+// Previous uncached check, replaced by services/updateNotifier.js (once a day, cached).
+// eslint-disable-next-line no-unused-vars
+async function checkForUpdateUncached() {
   try {
     const res = await axios.get('https://registry.npmjs.org/boilercraft/latest', { timeout: 1500 });
     return res.data?.version && isNewer(res.data.version, pkg.version) ? res.data.version : null;
@@ -125,12 +137,31 @@ function versionOption(v) {
   return { value: v.major, label: `${v.major}.x`, short: `${v.major}.x`, hint: `latest ${v.latest}${tags.length ? '  ·  ' + tags.join(', ') : ''}` };
 }
 
-async function askProject(given = {}) {
-  const cwd = path.resolve(given.out || process.cwd());
-  const ask = !given.yes;
+// Asks only when there is a real choice; a single option is picked silently.
+async function choose(ask, question, options, { initial = 0 } = {}) {
+  if (options.length === 1 || !ask) return options[options.length === 1 ? 0 : initial].value;
+  return ui.select(question, options, { initial });
+}
 
+async function askPreset(given) {
+  if (given.preset) return presets.loadPreset(given.preset);
+  if (given.yes || given.stack) return {};
+  const saved = presets.listPresets();
+  if (!saved.length) return {};
+  const pick = await ui.select('Start from', [
+    { value: null, label: 'A fresh project', short: 'Fresh' },
+    ...saved.map(p => ({ value: p.name, label: `Preset: ${p.name}`, short: p.name, hint: [p.stack, p.db, ...(p.extras || [])].filter(Boolean).join(' · ') }))
+  ]);
+  return pick ? presets.loadPreset(pick) : {};
+}
+
+async function askProject(given = {}) {
   console.log(ui.divider('New project'));
   console.log('');
+
+  given = { ...(await askPreset(given)), ...given };
+  const cwd = path.resolve(given.out || process.cwd());
+  const ask = !given.yes;
 
   const projectName = given.name
     ? (() => {
@@ -150,7 +181,7 @@ async function askProject(given = {}) {
           value: s,
           label: s.name,
           short: s.name,
-          hint: s.requirements.ok ? STACK_HINTS[s.id] : c.yellow(`needs ${s.requirements.missing.map(m => m.name).join(', ')} · can install`)
+          hint: s.requirements.ok ? stackHint(s) : c.yellow(`needs ${s.requirements.missing.map(m => m.name).join(', ')} · can install`)
         })))
       : stacks[0];
   }
@@ -164,7 +195,7 @@ async function askProject(given = {}) {
         throw new Error(`${stack.name} ${given.version} is not available. Options: ${stack.versions.map(v => v.major).join(', ')}`);
       }
     } else {
-      version = ask ? await ui.select(`${stack.name} version`, stack.versions.map(versionOption), { initial: rec }) : stack.versions[rec].major;
+      version = await choose(ask, `${stack.name} version`, stack.versions.map(versionOption), { initial: rec });
     }
   }
 
@@ -176,12 +207,10 @@ async function askProject(given = {}) {
       throw new Error(`Invalid ${opt.label.toLowerCase()} "${preset}". Options: ${opt.choices.map(ch => ch.value).join(', ')}`);
     }
     const initial = Math.max(0, opt.choices.findIndex(ch => ch.value === opt.default));
-    options[opt.id] = preset ?? (ask
-      ? await ui.select(opt.label, opt.choices.map(ch => ({ ...ch, short: ch.label })), { initial })
-      : opt.choices[initial].value);
+    options[opt.id] = preset ?? await choose(ask, opt.label, opt.choices.map(ch => ({ ...ch, short: ch.label })), { initial });
   }
 
-  const auth = given.auth !== undefined ? given.auth : ask
+  const auth = stack.auth === false ? false : given.auth !== undefined ? given.auth : ask
     ? await ui.select('Authentication', [
         { value: true, label: 'Include authentication', short: 'Included', hint: 'register · login · token' },
         { value: false, label: 'No authentication', short: 'None' }
@@ -202,12 +231,20 @@ async function askProject(given = {}) {
   if (given.db && !stack.databases.includes(given.db)) {
     throw new Error(`${stack.name} supports: ${stack.databases.join(', ')} (got "${given.db}")`);
   }
-  const database = given.db || (ask
-    ? await ui.select('Database', stack.databases.map(d => ({ value: d, label: DB_LABELS[d] || d })))
-    : stack.databases[0]);
-  const styling = given.styling || (ask
-    ? await ui.select('Styling', stack.stylings.map(s => ({ value: s, label: STYLE_LABELS[s] || s })))
-    : stack.stylings[0]);
+  const database = given.db || await choose(ask, 'Database', stack.databases.map(d => ({ value: d, label: DB_LABELS[d] || d })));
+  if (given.styling && !stack.stylings.includes(given.styling)) {
+    throw new Error(`${stack.name} supports styling: ${stack.stylings.join(', ')} (got "${given.styling}")`);
+  }
+  const styling = given.styling || await choose(ask, 'Styling', stack.stylings.map(s => ({ value: s, label: STYLE_LABELS[s] || s })));
+
+  const supported = stack.extras || [];
+  const givenExtras = typeof given.extras === 'string' ? given.extras.split(',').map(x => x.trim()).filter(Boolean) : given.extras;
+  const unknown = (givenExtras || []).filter(x => !supported.includes(x));
+  if (unknown.length) throw new Error(`${stack.name} does not support: ${unknown.join(', ')}. Options: ${supported.join(', ') || 'none'}`);
+  const extras = givenExtras || (ask && supported.length
+    ? await ui.multiSelect('Extras', supported.map(x => ({ value: x, label: EXTRAS[x].label, short: EXTRAS[x].label, hint: EXTRAS[x].hint })))
+    : []);
+  const git = given.git !== undefined ? given.git : ask ? await ui.confirm('Initialize a git repository?', true) : true;
 
   return {
     stack,
@@ -221,6 +258,8 @@ async function askProject(given = {}) {
       colorMode,
       database,
       styling,
+      extras,
+      git,
       port: given.port ? parseInt(given.port, 10) : undefined,
       appTitle: given.title,
       author: given.author,
@@ -241,10 +280,12 @@ function summaryBox(stack, config) {
     ['Project', c.bold(config.projectName)],
     ['Framework', `${stack.name}${version ? ` ${version}.x` : ''}`],
     ...(stack.options || []).map(opt => [opt.label, opt.choices.find(ch => ch.value === config.options?.[opt.id])?.label || '']),
-    ['Auth', config.auth.enabled ? 'Included' : 'None'],
+    ...(stack.auth === false ? [] : [['Auth', config.auth.enabled ? 'Included' : 'None']]),
     ['Theme', `${ui.swatch(THEMES[config.theme].primary)} ${THEMES[config.theme].name} · ${COLOR_MODES.find(m => m.value === config.colorMode)?.label}`],
     ['Database', DB_LABELS[config.database] || config.database],
     ['Styling', STYLE_LABELS[config.styling] || config.styling],
+    ['Extras', config.extras.length ? config.extras.map(x => EXTRAS[x].label).join(', ') : 'None'],
+    ['Git', config.git ? 'Initialize repository' : 'No'],
     ['Location', c.gray(displayPath(path.join(config.outputDir, config.projectName.toLowerCase())))]
   ];
   return ui.box(rows.map(([k, v]) => `${c.gray(k.padEnd(10))} ${v}`), { title: 'Summary' });
@@ -312,7 +353,7 @@ async function runGeneration(config) {
   return { ...result, seconds };
 }
 
-async function afterCreate(stack, result) {
+async function afterCreate(stack, result, config) {
   const rel = path.relative(process.cwd(), result.path) || '.';
   const steps = result.nextSteps || (stack.nextSteps || []);
   console.log('');
@@ -331,6 +372,7 @@ async function afterCreate(stack, result) {
       { value: 'run', label: 'Start the dev server', hint: steps.join('  →  ') },
       hasCode && { value: 'code', label: 'Open in VS Code' },
       { value: 'folder', label: 'Open the project folder' },
+      config && { value: 'preset', label: 'Save these choices as a preset', hint: 'reuse with --preset or from the menu' },
       { value: 'menu', label: 'Back to main menu' },
       { value: 'exit', label: 'Exit' }
     ].filter(Boolean);
@@ -356,6 +398,10 @@ async function afterCreate(stack, result) {
     } else if (action === 'code') {
       openInBackground(`code "${result.path}"`);
       log.ok('Opened in VS Code');
+    } else if (action === 'preset') {
+      const name = await ui.input('Preset name', { initial: `${stack.id}-default`, validate: v => (presets.slug(v) ? null : 'Use letters or numbers') });
+      const file = presets.savePreset(name, presets.presetFromConfig(config, stack));
+      log.ok(`Saved ${c.gray(file)} · next time: ${c.cyan(`npx boilercraft new my-app --preset ${presets.slug(name)}`)}`);
     } else if (action === 'folder') {
       openInBackground(openerFor(result.path));
       log.ok('Opened folder');
@@ -390,12 +436,23 @@ async function createFlow(given = {}) {
     }
 
     const result = await runGeneration(config);
+    if (given.savePreset) {
+      log.ok(`Preset saved: ${presets.savePreset(given.savePreset, presets.presetFromConfig(config, stack))}`);
+    }
+    if (given.open) openEditor(result.path, given.editor);
     if (given.yes || !ui.isTTY) {
       printPlainNextSteps(stack, result);
       return 'exit';
     }
-    return afterCreate(stack, result);
+    return afterCreate(stack, result, config);
   }
+}
+
+// --open, with --editor <cmd> (VS Code by default, e.g. --editor cursor).
+function openEditor(dir, editor) {
+  const cmd = typeof editor === 'string' && editor ? editor : 'code';
+  openInBackground(`${cmd} "${dir}"`);
+  log.ok(`Opening in ${cmd}`);
 }
 
 function printPlainNextSteps(stack, result) {
@@ -413,6 +470,13 @@ function printPlainNextSteps(stack, result) {
 // ---------------------------------------------------------------------------
 
 async function toolStatus() {
+  const first = out => (out ? (out.match(/(\d+\.\d+(\.\d+)?)/) || [])[1] || out.split('\n')[0] : null);
+  const [git, python, go, docker] = await Promise.all([
+    probe('git', ['--version']),
+    probe(process.platform === 'win32' ? 'python' : 'python3', ['--version']),
+    probe('go', ['version']),
+    probe('docker', ['--version'])
+  ]);
   const [npm, php, composer, sdks] = await Promise.all([
     probe('npm', ['--version']),
     probe('php', ['-r', '"echo PHP_VERSION;"']),
@@ -425,7 +489,11 @@ async function toolStatus() {
     { id: 'npm', name: 'npm', version: npm, usedBy: 'Next.js · Express' },
     { id: 'php', name: 'PHP', version: php, usedBy: 'Laravel · Raw PHP' },
     { id: 'composer', name: 'Composer', version: composer && (composer.match(/(\d+\.\d+\.\d+)/) || [])[1], usedBy: 'Laravel' },
-    { id: 'dotnet', name: '.NET SDK', version: sdkList.length ? sdkList.join(', ') : null, usedBy: '.NET' }
+    { id: 'dotnet', name: '.NET SDK', version: sdkList.length ? sdkList.join(', ') : null, usedBy: '.NET' },
+    { id: 'python', name: 'Python', version: first(python), usedBy: 'Django · FastAPI', install: 'https://www.python.org/downloads' },
+    { id: 'go', name: 'Go', version: first(go), usedBy: 'Go + Gin', install: 'https://go.dev/dl' },
+    { id: 'git', name: 'git', version: first(git), usedBy: 'repository setup', install: 'https://git-scm.com' },
+    { id: 'docker', name: 'Docker', version: first(docker), usedBy: 'Docker extra (optional)', install: 'https://docs.docker.com/get-docker' }
   ];
 }
 
@@ -470,6 +538,34 @@ async function toolsFlow() {
   }
 }
 
+/**
+ * `boilercraft doctor`: a plain, non-interactive health report. Lists every
+ * tool, which frameworks are ready right now, and exits 1 if a framework
+ * cannot be created (handy in CI and when reporting an issue).
+ */
+async function doctor() {
+  console.log(ui.divider('Doctor'));
+  console.log('');
+  const [tools, stacks] = await ui.spinner('Checking tools and frameworks…', () => Promise.all([toolStatus(), loadStacks()]));
+  console.log(ui.box([
+    `${c.gray('BoilerCraft'.padEnd(12))} v${pkg.version}`,
+    `${c.gray('Node.js'.padEnd(12))} ${process.version}`,
+    `${c.gray('Platform'.padEnd(12))} ${process.platform} ${process.arch}`,
+    `${c.gray('Tools home'.padEnd(12))} ${TOOLS_HOME}`
+  ], { title: 'System' }));
+  console.log(ui.box(tools.map(t => {
+    const mark = t.version ? c.green('✔') : c.yellow('✖');
+    return `${mark} ${t.name.padEnd(10)} ${(t.version || c.yellow('not found')).padEnd(18)} ${c.gray(t.usedBy)}`;
+  }), { title: 'Tools' }));
+  console.log(ui.box(stacks.map(s => s.requirements.ok
+    ? `${c.green('✔')} ${s.name}`
+    : `${c.yellow('✖')} ${s.name} ${c.gray('· needs ' + s.requirements.missing.map(m => `${m.name}${m.install ? ` (${m.install})` : ''}`).join(', '))}`
+  ), { title: 'Frameworks' }));
+  const ready = stacks.filter(s => s.requirements.ok).length;
+  console.log(`\n  ${ready}/${stacks.length} frameworks ready.${ready < stacks.length ? ` Run ${c.cyan('npx boilercraft tools')} to install PHP, Composer or .NET for you.` : ''}\n`);
+  return ready === stacks.length;
+}
+
 // ---------------------------------------------------------------------------
 // Browse / About / Web studio
 // ---------------------------------------------------------------------------
@@ -480,7 +576,7 @@ async function browseFlow() {
   const stacks = await ui.spinner('Loading frameworks and latest versions…', () => loadStacks());
   for (const s of stacks) {
     const status = s.requirements.ok ? c.green('● ready') : c.yellow(`○ needs ${s.requirements.missing.map(m => m.name).join(', ')}`);
-    const lines = [`${status}   ${c.gray(STACK_HINTS[s.id] || '')}`];
+    const lines = [`${status}   ${c.gray(stackHint(s))}`];
     if (s.versions.length) {
       lines.push('');
       for (const v of s.versions) {
@@ -491,7 +587,7 @@ async function browseFlow() {
     lines.push('', `${c.gray('Databases')}  ${s.databases.map(d => DB_LABELS[d] || d).join(', ')}`);
     console.log(ui.box(lines, { title: s.name }));
   }
-  console.log(`\n  ${c.gray('Versions are fetched live from npm, Packagist and the .NET release index,')}`);
+  console.log(`\n  ${c.gray('Versions are fetched live from npm, Packagist, PyPI, the Go proxy and .NET,')}`);
   console.log(`  ${c.gray('so new framework releases appear here automatically.')}\n`);
   await ui.select('Done?', [{ value: 'back', label: 'Back to main menu' }]);
 }
@@ -564,8 +660,9 @@ async function home() {
     let action;
     try {
       action = await ui.select('What would you like to do?', [
-        { value: 'create', label: 'Create a new project', hint: 'Laravel · Next.js · Express · .NET · PHP' },
+        { value: 'create', label: 'Create a new project', hint: 'Laravel · Next.js · NestJS · Vite · Django · FastAPI · Go · .NET' },
         { value: 'tools', label: 'Check & install tools', hint: 'PHP · Composer · .NET SDK' },
+        { value: 'doctor', label: 'Run doctor', hint: 'what is installed, what is ready' },
         { value: 'browse', label: 'Browse frameworks & versions' },
         { value: 'web', label: 'Open the web studio', hint: 'same features in your browser' },
         { value: 'about', label: 'About BoilerCraft' },
@@ -583,6 +680,7 @@ async function home() {
         if ((await createFlow()) === 'exit') return goodbye();
       } else if (action === 'tools') await toolsFlow();
       else if (action === 'browse') await browseFlow();
+      else if (action === 'doctor') await doctor();
       else if (action === 'web') await webFlow();
       else if (action === 'about') await aboutFlow();
     } catch (err) {
@@ -593,4 +691,23 @@ async function home() {
   }
 }
 
-module.exports = { home, createFlow, toolsFlow, browseFlow, printBanner, goodbye, AUTHOR };
+function listPresetsFlow() {
+  const saved = presets.listPresets();
+  console.log('');
+  if (!saved.length) {
+    log.info(`No presets yet. Create a project and choose "Save these choices as a preset", or pass ${c.cyan('--save-preset <name>')}.`);
+  } else {
+    console.log(ui.box(saved.map(p => `${c.bold(p.name.padEnd(18))} ${c.gray([p.stack, p.version && `v${p.version}`, p.db, ...(p.extras || [])].filter(Boolean).join(' · '))}`), { title: 'Presets' }));
+    console.log(`\n  ${c.gray(`Stored in ${presets.PRESETS_DIR}`)}`);
+    console.log(`  ${c.gray('Use:')} ${c.cyan(`npx boilercraft new my-app --preset ${saved[0].name}`)}`);
+  }
+  console.log('');
+}
+
+// Shown after scripted commands; the menu shows it at the top instead.
+async function notifyUpdate() {
+  const latest = await Promise.race([checkForUpdate(), new Promise(r => setTimeout(() => r(null), 1500))]);
+  if (latest) console.log(ui.box([`Update available ${c.gray(pkg.version)} → ${c.green(latest)}`, `Run ${c.cyan('npx boilercraft@latest')}`], { color: c.yellow }));
+}
+
+module.exports = { home, createFlow, toolsFlow, browseFlow, doctor, notifyUpdate, listPresetsFlow, printBanner, goodbye, AUTHOR };

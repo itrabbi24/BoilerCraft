@@ -55,6 +55,22 @@ const sources = {
     return newestPerMajor(releases.map(r => r.version), minMajor);
   },
 
+  async pypi({ package: pkg, minMajor = 0 }) {
+    const res = await axios.get(`https://pypi.org/pypi/${encodeURIComponent(pkg)}/json`, { timeout: 5000 });
+    return newestPerMajor(Object.keys(res.data.releases || {}), minMajor);
+  },
+
+  // Go modules: proxy.golang.org lists every tagged version, one per line.
+  async goproxy({ package: mod, minMajor = 0 }) {
+    const res = await axios.get(`https://proxy.golang.org/${mod.toLowerCase()}/@v/list`, { timeout: 5000, responseType: 'text' });
+    return newestPerMajor(String(res.data).split('\n').filter(Boolean), minMajor);
+  },
+
+  // Stacks with no upstream framework release (e.g. raw PHP) pin their list.
+  async static({ offline = [] }) {
+    return offline.map(major => ({ major, latest: `${major}.x` }));
+  },
+
   async dotnet({ minMajor = 0 }) {
     const res = await axios.get(
       'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',

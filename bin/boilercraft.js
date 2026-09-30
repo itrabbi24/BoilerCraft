@@ -35,21 +35,36 @@ const HELP = `
   ${c.bold('Automation')} ${c.gray('(scripts / CI, no prompts)')}
     npx boilercraft new <name> [flags]
 
-    -s, --stack <id>        laravel | nextjs | node-express | dotnet-core | raw-php
+    -s, --stack <id>        laravel | nextjs | nestjs | vite | node-express | dotnet-core
+                            django | fastapi | go-gin | raw-php
     -v, --version <major>   Framework major version (default: recommended)
         --auth / --no-auth  Authentication module (default: on)
         --router <type>     app | pages          (Next.js, default: app)
         --frontend <name>   blade | vue | react  (Laravel, default: blade)
         --template <type>   mvc | api            (.NET, default: mvc)
+        --framework <name>  react | vue | svelte (Vite, default: react)
+        --language <lang>   ts | js              (Vite, default: ts)
     -t, --theme <name>      midnight | emerald | royal | crimson
     -m, --mode <mode>       all | dark | light
-    -d, --db <name>         mysql | mssql | mongodb
+    -d, --db <name>         mysql | mssql | mongodb | postgresql | sqlite | none
         --styling <name>    tailwind | bootstrap | vanilla
+    -e, --extras <list>     docker,ci,lint,prisma   (comma separated)
+        --git / --no-git    Initialize a git repository (default: on)
+    -p, --preset <name>     Use a saved preset or a JSON file for the answers
+        --save-preset <n>   Save this run's answers as a preset
+        --open              Open the project in your editor when done
+        --editor <cmd>      Editor for --open (default: code, e.g. cursor)
     -o, --out <dir>         Parent folder (default: current directory)
     -y, --yes               Defaults for anything not given
         --install-tools     Install missing PHP / Composer / .NET SDK automatically
         --no-fallback       Fail instead of using offline templates
     -h, --help              This help
+
+  ${c.bold('Other commands')}
+    npx boilercraft doctor     Report installed tools and which frameworks are ready
+    npx boilercraft tools      Install PHP, Composer or the .NET SDK
+    npx boilercraft list       Frameworks and live versions
+    npx boilercraft presets    Saved presets
 `;
 
 async function main() {
@@ -65,6 +80,14 @@ async function main() {
       router: { type: 'string' },
       frontend: { type: 'string' },
       template: { type: 'string' },
+      framework: { type: 'string' },
+      language: { type: 'string' },
+      extras: { type: 'string', short: 'e' },
+      git: { type: 'boolean' },
+      preset: { type: 'string', short: 'p' },
+      'save-preset': { type: 'string' },
+      open: { type: 'boolean' },
+      editor: { type: 'string' },
       db: { type: 'string', short: 'd' },
       styling: { type: 'string' },
       port: { type: 'string' },
@@ -86,12 +109,19 @@ async function main() {
   // Non-interactive / scripted use.
   if (command === 'new' || command === 'create') {
     app.printBanner();
-    const given = { ...values, name, installTools: values['install-tools'], noFallback: values.fallback === false };
+    const given = { ...values, name, installTools: values['install-tools'], noFallback: values.fallback === false, savePreset: values['save-preset'] };
     await app.createFlow(given);
+    await app.notifyUpdate();
     return app.goodbye();
   }
   if (command === 'list') return app.browseFlow();
-  if (command === 'doctor' || command === 'tools') return app.toolsFlow();
+  // `doctor` used to open the interactive tools screen; it is now a plain report.
+  if (command === 'doctor') {
+    if (!(await app.doctor())) process.exitCode = 1;
+    return app.notifyUpdate();
+  }
+  if (command === 'tools') return app.toolsFlow();
+  if (command === 'presets') return app.listPresetsFlow();
 
   // `npx boilercraft my-app` → menu-free create with the name filled in.
   app.printBanner();

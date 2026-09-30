@@ -530,6 +530,7 @@
         const { stacks } = await res.json();
         for (const stack of stacks) {
           stackCatalog[stack.id] = stack;
+          addBackendCard(stack);
           const select = document.getElementById(VERSION_SELECTS[stack.id]);
           if (!select) continue;
           select.innerHTML = '';
@@ -550,6 +551,26 @@
       }
       renderEngineNote();
       updateSummary();
+    }
+
+    // Stacks without a hand-made card above (NestJS, Vite, Django, FastAPI, Go …)
+    // get one from their manifest, so a new stack shows up here with no HTML change.
+    function addBackendCard(stack) {
+      const grid = document.getElementById('backendOptions');
+      if (grid.querySelector(`[data-stack="${stack.id}"]`)) return;
+      if ([...grid.querySelectorAll('.choice-card')].some(c => (c.getAttribute('onclick') || '').includes(`'${stack.id}'`))) return;
+      const card = document.createElement('div');
+      card.className = 'choice-card';
+      card.dataset.stack = stack.id;
+      card.onclick = () => selectBackend(stack.id, card);
+      const title = document.createElement('div');
+      title.className = 'choice-title';
+      title.textContent = stack.name;
+      const desc = document.createElement('div');
+      desc.className = 'choice-desc';
+      desc.textContent = stack.description || '';
+      card.append(title, desc);
+      grid.appendChild(card);
     }
 
     function renderEngineNote() {
@@ -645,7 +666,10 @@
         port: parseInt(document.getElementById('serverPort').value),
         backend: state.backend,
         stack: state.backend,
-        database: state.database,
+        // Stacks like Vite or Go have their own database list (e.g. only 'none').
+        database: stackCatalog[state.backend] && !stackCatalog[state.backend].databases.includes(state.database)
+          ? stackCatalog[state.backend].databases[0]
+          : state.database,
         styling: state.styling,
         // Keyed by stack id; values are major versions ("12", "16", …).
         versions: {

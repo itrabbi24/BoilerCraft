@@ -91,3 +91,27 @@ Built-in placeholders: `PROJECT_NAME`, `NAMESPACE`, `APP_TITLE`, `APP_DESC`, `AU
 ## Adding a new stack
 
 Create `stacks/<id>/stack.json` with `versions`, `requires` and `steps`. The API (`GET /api/stacks`) and generation pick it up automatically. The only UI change needed is a backend card and a version `<select>` mapped in `VERSION_SELECTS` in `public/index.html`.
+
+## Fields added in 1.1
+
+| Field | Meaning |
+|---|---|
+| `order` | Position in the framework menu (lower first). |
+| `description` | One-line hint shown in the menu, `doctor` and the web studio. |
+| `auth: false` | The stack has no BoilerCraft auth module; the Authentication question is skipped. |
+| `runtime` | `node` · `php` · `dotnet` · `python` · `go`. Drives the Docker and CI recipes. |
+| `extras` | Which add-ons the stack offers: `docker`, `ci`, `lint`, `prisma`. |
+| `docker` | `{ "build": "...", "start": "..." }` commands used in the generated Dockerfile. |
+| `ci` | `{ "test": "..." }` overrides the test command in the generated workflow. |
+| `versions.source` | Also `pypi`, `goproxy` (Go module proxy) and `static` (fixed `offline` list). |
+| `requires[].platform` | Only check this tool on the given OS, e.g. `python` on `win32`, `python3` elsewhere. |
+
+Step additions:
+
+- `when: { "extra": "docker" }`: run only when that extra was chosen.
+- `write` + `"ifMissing": true`: skip if the file already exists.
+- `append` + `"skipIfContains": "..."`: skip if the file already contains the text.
+
+After the steps, the engine applies the chosen extras (`services/engine/extras.js`) and then runs `git init` with an initial commit (`services/engine/postCreate.js`; skipped with `git: false` / `--no-git`). Commands run with no stdin, so a tool that prompts gets EOF instead of hanging.
+
+Tests live in `test/` and use a fixture stack (`test/fixtures/stacks/demo`) via `BOILERCRAFT_STACKS_DIR`, so they run offline: `npm test`.

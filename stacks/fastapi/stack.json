@@ -1,0 +1,40 @@
+{
+  "id": "fastapi",
+  "name": "FastAPI",
+  "order": 8,
+  "description": "Python · async API · automatic OpenAPI docs",
+  "runtime": "python",
+  "extras": ["docker", "ci"],
+  "docker": { "start": "fastapi run app/main.py --port 8000" },
+  "auth": false,
+  "defaultPort": 8000,
+  "databases": ["none", "sqlite", "postgresql"],
+  "stylings": ["tailwind", "bootstrap", "vanilla"],
+  "nextSteps": ["{{VENV_PY}} -m fastapi dev app/main.py --port {{PORT}}"],
+  "versions": { "source": "pypi", "package": "fastapi", "minMajor": 0, "testedUpTo": 0, "offline": [0] },
+  "requires": [
+    { "cmd": "python", "name": "Python 3", "install": "https://www.python.org/downloads", "platform": "win32" },
+    { "cmd": "python3", "name": "Python 3", "install": "https://www.python.org/downloads", "platform": ["darwin", "linux"] }
+  ],
+  "vars": [
+    { "name": "PY", "value": "python3" },
+    { "name": "PY", "when": { "platform": "win32" }, "value": "python" },
+    { "name": "VENV_PY", "value": ".venv/bin/python" },
+    { "name": "VENV_PY", "when": { "platform": "win32" }, "value": ".venv\\Scripts\\python" },
+    { "name": "PY_DB_DEPS", "value": "" },
+    { "name": "PY_DB_DEPS", "when": { "database": "sqlite" }, "value": "sqlalchemy\n" },
+    { "name": "PY_DB_DEPS", "when": { "database": "postgresql" }, "value": "sqlalchemy\npsycopg[binary]\n" }
+  ],
+  "steps": [
+    { "label": "Creating virtual environment (.venv)", "run": ["{{PY}}", "-m", "venv", ".venv"] },
+    { "write": "requirements.txt", "content": "fastapi[standard]\npython-dotenv\n{{PY_DB_DEPS}}" },
+    { "label": "Installing FastAPI", "run": ["{{VENV_PY}}", "-m", "pip", "install", "-q", "-r", "requirements.txt"] },
+    { "label": "Applying BoilerCraft overlay", "copy": "overlays/common" },
+    { "when": { "database": ["sqlite", "postgresql"] }, "copy": "overlays/db" },
+    { "write": "app/static/theme.css", "content": "{{THEME_CSS}}" },
+    { "write": "app/static/theme.js", "content": "{{THEME_JS}}" },
+    { "write": ".env", "content": "APP_NAME={{PROJECT_NAME}}\nDB_ENGINE={{DB_TYPE}}\n{{DB_ENV}}\n" },
+    { "write": ".env.example", "content": "APP_NAME={{PROJECT_NAME}}\nDB_ENGINE={{DB_TYPE}}\n{{DB_ENV_EXAMPLE}}\n" },
+    { "write": ".gitignore", "content": ".venv/\n__pycache__/\n*.pyc\n.env\ndatabase.sqlite\n" }
+  ]
+}

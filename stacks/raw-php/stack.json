@@ -1,0 +1,25 @@
+{
+  "id": "raw-php",
+  "name": "Raw PHP (MVC)",
+  "order": 10,
+  "description": "No framework · PDO · router, query builder and session auth",
+  "runtime": "php",
+  "extras": ["docker", "ci"],
+  "docker": { "start": "php -S 0.0.0.0:8000 -t public" },
+  "defaultPort": 8000,
+  "databases": ["mysql", "postgresql", "sqlite", "mssql"],
+  "stylings": ["tailwind", "bootstrap", "vanilla"],
+  "nextSteps": ["php -S localhost:{{PORT}} -t public"],
+  "versions": { "source": "static", "minMajor": 8, "testedUpTo": 8, "offline": [8] },
+  "requires": [
+    { "cmd": "php", "name": "PHP", "tool": "php", "install": "https://www.php.net/downloads" }
+  ],
+  "steps": [
+    { "label": "Copying the BoilerCraft MVC skeleton", "copy": "../../templates/raw-php-mysql" },
+    { "write": "public/css/theme.css", "content": "{{THEME_CSS}}" },
+    { "write": "public/js/theme.js", "content": "{{THEME_JS}}" },
+    { "write": ".env", "content": "APP_NAME={{PROJECT_NAME}}\nDB_CONNECTION={{DB_TYPE}}\n{{DB_ENV}}\n" },
+    { "write": ".env.example", "content": "APP_NAME={{PROJECT_NAME}}\nDB_CONNECTION={{DB_TYPE}}\n{{DB_ENV_EXAMPLE}}\n" },
+    { "write": ".gitignore", "content": ".env\n/vendor\ndatabase.sqlite\n" }
+  ]
+}
