@@ -53,26 +53,80 @@ Each generated project comes with its own customized guide. You can also explore
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Get started
 
-### 1. Clone the repository
+```bash
+npx boilercraft
+```
+
+That's the only command you need. It works on Windows, macOS and Linux, needs only Node.js 18.3+, and there's nothing to clone or install first.
+
+```text
+  ██████╗  ██████╗ ██╗██╗     ███████╗██████╗  ██████╗██████╗  █████╗ ███████╗████████╗
+  ...
+  by ARG RABBI   ·   v1.0.0
+
+  ? What would you like to do?
+    ❯ Create a new project          Laravel · Next.js · Express · .NET · PHP
+      Check & install tools         PHP · Composer · .NET SDK
+      Browse frameworks & versions
+      Open the web studio           same features in your browser
+      About BoilerCraft
+      Exit
+```
+
+Everything happens inside that menu. Use ↑/↓ to move and Enter to choose:
+
+| Menu | What it does |
+|---|---|
+| **Create a new project** | Name → framework → **version** (fetched live, so new releases appear automatically) → **auth** on/off → **theme** (Slate Midnight · Cyber Emerald · Royal Indigo · Crimson Amber) and dark/light mode → database → styling → summary → create. When it's done you can **start the dev server** or **open the project in VS Code** straight from the menu. |
+| **Check & install tools** | Shows what's installed and installs PHP, Composer or any .NET SDK version for you. |
+| **Browse frameworks & versions** | Every supported version, with LTS and recommended marked. |
+| **Open the web studio** | The same generator in your browser. |
+
+Projects are created with each framework's **official tool** (`composer create-project`, `create-next-app`, `dotnet new`, `npm`), so they always match the version you picked. BoilerCraft then adds auth, database wiring and your theme on top.
+
+### Missing PHP, Composer or the .NET SDK?
+
+BoilerCraft notices and offers to install it. You don't need to leave the menu:
+
+| Tool | How it is installed |
+|---|---|
+| .NET SDK | Microsoft's official `dotnet-install` script, exact version, user folder, no admin rights |
+| Composer | Official installer (signature-verified), user folder |
+| PHP | `winget` (Windows) · Homebrew (macOS) · apt / dnf / pacman (Linux) |
+
+Tools in the user folder live in `~/.boilercraft/tools` and are added to your user PATH.
+
+<details>
+<summary>Automation (scripts / CI, no prompts)</summary>
+
+```bash
+npx boilercraft new shop -s laravel -v 12 -t emerald -d mysql -y
+npx boilercraft new api  -s dotnet-core -v 10 --no-auth -y --install-tools
+npx boilercraft --help
+```
+
+Flags you leave out are asked interactively, or take their defaults with `-y`. See [docs/STACK_ENGINE.md](docs/STACK_ENGINE.md) for how versions are managed.
+</details>
+
+<details>
+<summary>Working on BoilerCraft itself</summary>
+
 ```bash
 git clone https://github.com/itrabbi24/BoilerCraft.git
-cd BoilerCraft
+cd BoilerCraft && npm install
+node bin/boilercraft.js       # or: npm link, then `boilercraft`
 ```
 
-### 2. Install dependencies
-```bash
-npm install
-```
-
-### 3. Launch Web Studio
-```bash
-npm start
-```
-Open your browser at: `http://localhost:4800`
+To release: bump `version` in package.json, then push a tag `vX.Y.Z`. The GitHub Action smoke-tests on Windows, macOS and Linux, then publishes to npm (needs the `NPM_TOKEN` secret).
+</details>
 
 ---
+
+<!--
+  Desktop app (Electron) — DEPRECATED in favour of the cross-platform CLI above.
+  main.js and the electron scripts are kept so it can be revived.
 
 ## 💻 Desktop Application (Electron)
 
@@ -81,6 +135,7 @@ To launch as a native Windows / Mac / Linux desktop application:
 ```bash
 npm run desktop
 ```
+-->
 
 ---
 
@@ -90,7 +145,12 @@ npm run desktop
 BoilerCraft/
 ├── main.js                   # Electron Desktop entry point
 ├── server.js                 # Studio API & Web server (Express)
+├── bin/boilercraft.js        # CLI entry (`npx boilercraft`)
+├── cli/                      # Interactive menus, banner, prompts (ui.js, app.js)
+├── stacks/<id>/stack.json    # Per-stack manifest: versions, official creator, overlays
 ├── services/
+│   ├── engine/               # Manifest runner + live version catalog
+│   ├── generate.js           # Shared entry (engine, with template fallback)
 │   ├── projectGenerator.js   # Master multi-stack project generator
 │   ├── versionResolver.js    # Live NPM & Packagist API version fetcher
 │   ├── themeGenerator.js     # CSS variables & theme switcher engine

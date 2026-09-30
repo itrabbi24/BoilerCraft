@@ -1,38 +1,42 @@
-name: Build & Release Portable Executable
-
-on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-jobs:
-  release:
-    runs-on: windows-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Portable Windows EXE
-        run: npm run build:exe
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: dist/*.exe
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# DISABLED: BoilerCraft now ships as a cross-platform CLI (`npx boilercraft`),
+# so the Windows-only portable .exe is no longer built. Kept for reference;
+# uncomment to bring the desktop build back. npm publishing lives in publish.yml.
+#
+# name: Build & Release Portable Executable
+#
+# on:
+#   push:
+#     tags:
+#       - 'v*'
+#   workflow_dispatch:
+#
+# permissions:
+#   contents: write
+#
+# jobs:
+#   release:
+#     runs-on: windows-latest
+#
+#     steps:
+#       - name: Check out repository
+#         uses: actions/checkout@v4
+#
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+#
+#       - name: Install dependencies
+#         run: npm ci
+#
+#       - name: Build Portable Windows EXE
+#         run: npm run build:exe
+#
+#       - name: Create GitHub Release
+#         uses: softprops/action-gh-release@v2
+#         if: startsWith(github.ref, 'refs/tags/')
+#         with:
+#           files: dist/*.exe
+#           generate_release_notes: true
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

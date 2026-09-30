@@ -1,0 +1,44 @@
+name: Publish CLI to npm
+
+# Push a tag like v1.1.0 (matching package.json "version") to publish
+# `npx boilercraft`. Requires an NPM_TOKEN repository secret
+# (npmjs.com → Access Tokens → Granular, publish rights for "boilercraft").
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  smoke-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --omit=dev
+      - run: node bin/boilercraft.js --help
+      - run: node bin/boilercraft.js new ci-app -s node-express -d mongodb -y -o ${{ runner.temp }}
+      - run: node bin/boilercraft.js list
+
+  publish:
+    needs: smoke-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - run: npm ci --omit=dev
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

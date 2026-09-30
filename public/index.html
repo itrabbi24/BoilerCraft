@@ -93,6 +93,9 @@
       display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
       background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 14px;
     }
+    .engine-note { grid-column: 1 / -1; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+    .engine-note.warn { color: #b45309; }
+    .choice-card.unsupported { opacity: 0.45; }
 
     .checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .checkbox-tile {
@@ -218,35 +221,76 @@
         <div class="framework-controls" id="versionControlBox">
           <div class="form-group" id="laravelVersionGroup">
             <label for="laravelVersion">Laravel Framework Release</label>
-            <select id="laravelVersion" onchange="updateSummary()">
+            <!-- Options are loaded live from /api/stacks (npm / Packagist / .NET release index),
+                 so new framework releases appear without editing this file.
+                 Old hardcoded list kept for reference:
               <option value="^11.0" selected>Laravel 11.x (Latest Modern LTS)</option>
               <option value="^10.0">Laravel 10.x (Classic LTS)</option>
+            -->
+            <select id="laravelVersion" onchange="updateSummary()">
+              <option value="">Loading versions…</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="laravelFrontendGroup">
+            <label for="laravelFrontend">Laravel Frontend</label>
+            <select id="laravelFrontend" onchange="updateSummary()">
+              <option value="blade" selected>Blade (classic)</option>
+              <option value="vue">Vue 3 (Inertia)</option>
+              <option value="react">React (Inertia)</option>
             </select>
           </div>
 
           <div class="form-group" id="nodeVersionGroup">
             <label for="nodeVersion">Node.js Express Release</label>
-            <select id="nodeVersion" onchange="updateSummary()">
+            <!-- Loaded live from /api/stacks. Old hardcoded list:
               <option value="^5.0.0" selected>Express 5.x (Modern Next-Gen)</option>
               <option value="^4.21.0">Express 4.x (Classic Stable)</option>
+            -->
+            <select id="nodeVersion" onchange="updateSummary()">
+              <option value="">Loading versions…</option>
             </select>
           </div>
 
           <div class="form-group" id="nextVersionGroup">
             <label for="nextVersion">Next.js Engine Version</label>
-            <select id="nextVersion" onchange="updateSummary()">
+            <!-- Loaded live from /api/stacks. Old hardcoded list:
               <option value="^15.0.0">Next.js 15.x (Turbopack + React 19)</option>
               <option value="^14.2.0" selected>Next.js 14.x (Stable App Router)</option>
+            -->
+            <select id="nextVersion" onchange="updateSummary()">
+              <option value="">Loading versions…</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="nextRouterGroup">
+            <label for="nextRouter">Next.js Router</label>
+            <select id="nextRouter" onchange="updateSummary()">
+              <option value="app" selected>App Router (recommended)</option>
+              <option value="pages">Pages Router (classic)</option>
             </select>
           </div>
 
           <div class="form-group" id="dotnetVersionGroup">
             <label for="dotnetVersion">.NET Target Framework</label>
-            <select id="dotnetVersion" onchange="updateSummary()">
+            <!-- Loaded live from /api/stacks. Old hardcoded list:
               <option value="net8.0" selected>.NET 8.0 (Long Term Support)</option>
               <option value="net9.0">.NET 9.0 (Standard Term Support)</option>
+            -->
+            <select id="dotnetVersion" onchange="updateSummary()">
+              <option value="">Loading versions…</option>
             </select>
           </div>
+
+          <div class="form-group" id="dotnetTemplateGroup">
+            <label for="dotnetTemplate">.NET Project Type</label>
+            <select id="dotnetTemplate" onchange="updateSummary()">
+              <option value="mvc" selected>MVC (Model · View · Controller)</option>
+              <option value="api">Web API (JSON + Swagger)</option>
+            </select>
+          </div>
+
+          <div class="engine-note" id="engineNote"></div>
         </div>
       </section>
 
@@ -462,9 +506,76 @@
       const dotnetGroup = document.getElementById('dotnetVersionGroup');
 
       laravelGroup.style.display = (state.backend === 'laravel') ? 'flex' : 'none';
+      document.getElementById('laravelFrontendGroup').style.display = (state.backend === 'laravel') ? 'flex' : 'none';
       nextGroup.style.display = (state.backend === 'nextjs') ? 'flex' : 'none';
+      document.getElementById('nextRouterGroup').style.display = (state.backend === 'nextjs') ? 'flex' : 'none';
       nodeGroup.style.display = (state.backend === 'node-express') ? 'flex' : 'none';
       dotnetGroup.style.display = (state.backend === 'dotnet-core') ? 'flex' : 'none';
+      document.getElementById('dotnetTemplateGroup').style.display = (state.backend === 'dotnet-core') ? 'flex' : 'none';
+      renderEngineNote();
+    }
+
+    // ---- Live stack catalog (versions + toolchain status) ----
+    const VERSION_SELECTS = {
+      'laravel': 'laravelVersion',
+      'nextjs': 'nextVersion',
+      'node-express': 'nodeVersion',
+      'dotnet-core': 'dotnetVersion'
+    };
+    let stackCatalog = {};
+
+    async function loadStacks() {
+      try {
+        const res = await fetch('/api/stacks');
+        const { stacks } = await res.json();
+        for (const stack of stacks) {
+          stackCatalog[stack.id] = stack;
+          const select = document.getElementById(VERSION_SELECTS[stack.id]);
+          if (!select) continue;
+          select.innerHTML = '';
+          for (const v of stack.versions) {
+            const tags = [];
+            if (v.recommended) tags.push('Recommended');
+            if (v.lts) tags.push('LTS');
+            if (!v.tested) tags.push('Untested');
+            const opt = document.createElement('option');
+            opt.value = String(v.major);
+            opt.textContent = `${stack.name} ${v.major}.x — latest ${v.latest}${tags.length ? ' (' + tags.join(', ') + ')' : ''}`;
+            if (v.recommended) opt.selected = true;
+            select.appendChild(opt);
+          }
+        }
+      } catch (err) {
+        logToConsole(`Could not load live versions: ${err.message}`);
+      }
+      renderEngineNote();
+      updateSummary();
+    }
+
+    function renderEngineNote() {
+      const note = document.getElementById('engineNote');
+      const stack = stackCatalog[state.backend];
+
+      document.querySelectorAll('#dbOptions .choice-card').forEach(card => {
+        const db = (card.getAttribute('onclick').match(/selectDb\('([^']+)'/) || [])[1];
+        const unsupported = stack && !stack.databases.includes(db);
+        card.classList.toggle('unsupported', !!unsupported);
+        card.title = unsupported ? `${stack.name} does not support this database yet` : '';
+      });
+
+      if (!stack) {
+        note.className = 'engine-note';
+        note.textContent = state.backend === 'raw-php' ? 'Raw PHP is generated from built-in templates.' : '';
+        return;
+      }
+      if (stack.requirements.ok) {
+        note.className = 'engine-note';
+        note.textContent = `Base project is created with the official ${stack.name} tooling, so it always matches the selected version exactly.`;
+      } else {
+        note.className = 'engine-note warn';
+        note.textContent = `Missing on this machine: ${stack.requirements.missing.map(m => m.name + (m.install ? ' → ' + m.install : '')).join(' · ')}. ` +
+          `Generation will fall back to offline templates until these are installed.`;
+      }
     }
 
     function selectDb(d, el) {
@@ -498,7 +609,7 @@
       // Version display
       let verText = '';
       if (state.backend === 'laravel') verText = document.getElementById('laravelVersion').value;
-      else if (state.backend === 'nextjs') verText = document.getElementById('nextVersion').value;
+      else if (state.backend === 'nextjs') verText = `${document.getElementById('nextVersion').value}, ${document.getElementById('nextRouter').value} router`;
       else if (state.backend === 'node-express') verText = document.getElementById('nodeVersion').value;
       else if (state.backend === 'dotnet-core') verText = document.getElementById('dotnetVersion').value;
       document.getElementById('sumStack').innerText = `${state.backend.toUpperCase()} (${verText || 'latest'})`;
@@ -513,7 +624,9 @@
 
     function logToConsole(text) {
       const b = document.getElementById('consoleLogs');
-      b.innerHTML += `<br>> ${text}`;
+      // textContent, not innerHTML: log lines include raw CLI/error output.
+      b.appendChild(document.createElement('br'));
+      b.appendChild(document.createTextNode(`> ${text}`));
       b.scrollTop = b.scrollHeight;
     }
 
@@ -534,12 +647,18 @@
         stack: state.backend,
         database: state.database,
         styling: state.styling,
+        // Keyed by stack id; values are major versions ("12", "16", …).
         versions: {
-          laravel: document.getElementById('laravelVersion').value,
-          nodeExpress: document.getElementById('nodeVersion').value,
-          nextjs: document.getElementById('nextVersion').value,
-          dotnet: document.getElementById('dotnetVersion').value
+          'laravel': document.getElementById('laravelVersion').value,
+          'node-express': document.getElementById('nodeVersion').value,
+          'nextjs': document.getElementById('nextVersion').value,
+          'dotnet-core': document.getElementById('dotnetVersion').value
         },
+        // Stack-specific options (see "options" in stacks/<id>/stack.json).
+        options: state.backend === 'nextjs' ? { router: document.getElementById('nextRouter').value }
+          : state.backend === 'laravel' ? { frontend: document.getElementById('laravelFrontend').value }
+          : state.backend === 'dotnet-core' ? { template: document.getElementById('dotnetTemplate').value }
+          : {},
         auth: {
           enabled: document.getElementById('authEnabled').checked,
           roles: document.getElementById('roleAuthEnabled').checked
@@ -555,13 +674,32 @@
       };
 
       try {
-        const response = await fetch('/api/generate', {
+        // Streamed NDJSON: log lines while official installers run, then the result.
+        const response = await fetch('/api/generate?stream=1', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const result = await response.json();
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let result = { success: false, error: 'No response from generator' };
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let nl;
+          while ((nl = buffer.indexOf('\n')) !== -1) {
+            const line = buffer.slice(0, nl).trim();
+            buffer = buffer.slice(nl + 1);
+            if (!line) continue;
+            const msg = JSON.parse(line);
+            if (msg.type === 'log') logToConsole(msg.message);
+            else if (msg.type === 'result') result = msg;
+          }
+        }
         if (result.success) {
+          (result.warnings || []).forEach(w => logToConsole(`WARNING: ${w}`));
           logToConsole(`SUCCESS! Created at: ${result.path}`);
           alert(`🎉 Project '${result.projectName}' created successfully!\n\nFolder Path: ${result.path}`);
         } else {
@@ -577,6 +715,7 @@
 
     syncVersionDropdownVisibility();
     updateSummary();
+    loadStacks();
   </script>
 </body>
 </html>
